@@ -1,16 +1,21 @@
 package com.example.demochatapplication.features.login.ui
 
+import android.content.Intent
 import androidx.compose.runtime.mutableStateOf
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.demochatapplication.features.login.core.UnsuccessfulLoginException
 import com.example.demochatapplication.features.login.domain.model.SignInBodyEntity
 import com.example.demochatapplication.features.login.domain.repository.IAuthenticationRepository
 import com.example.demochatapplication.features.login.ui.uiState.LoginScreenState
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.SavePasswordRequest
+import com.google.android.gms.auth.api.identity.SignInPassword
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import javax.inject.Inject
+
 
 @HiltViewModel
 class LoginScreenViewModel @Inject constructor(
@@ -18,6 +23,35 @@ class LoginScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     val loginScreenState = mutableStateOf(LoginScreenState())
+    val showHintPicker = mutableStateOf(false)
+    val getPassword = mutableStateOf(false)
+    lateinit var signInRequest: BeginSignInRequest
+
+    init {
+        signInRequest = BeginSignInRequest.builder()
+            .setPasswordRequestOptions(
+                BeginSignInRequest.PasswordRequestOptions.builder()
+                    .setSupported(true)
+                    .build()
+            )
+            // Automatically sign in when exactly one credential is retrieved.
+            .setAutoSelectEnabled(true)
+            .build()
+    }
+
+    fun onShowHintPickerEventOver() {
+        showHintPicker.value = false
+    }
+
+    fun getSavePasswordRequest(username: String, password: String): SavePasswordRequest {
+        val signInPassword = SignInPassword(username, password);
+        val savePasswordRequest =
+            SavePasswordRequest.builder()
+                .setSignInPassword(signInPassword)
+                .build()
+
+        return savePasswordRequest
+    }
 
     fun onLoginButtonClicked() {
         viewModelScope.launch {
@@ -27,7 +61,7 @@ class LoginScreenViewModel @Inject constructor(
                 val signInUserResponseEntity = authenticationRepository.signInUser(
                     SignInBodyEntity(
                         username = username,
-                        password = password
+                        password = password,
                     )
                 )
 
@@ -35,6 +69,7 @@ class LoginScreenViewModel @Inject constructor(
             } catch (unsuccessfulLoginException: UnsuccessfulLoginException) {
                 Timber.tag(TAG).d("Unable to login: ${unsuccessfulLoginException.message}")
             }
+            showHintPicker.value = true
         }
     }
 
@@ -53,5 +88,6 @@ class LoginScreenViewModel @Inject constructor(
 
     companion object {
         const val TAG = "loginscreenviewmodel"
+        const val REQUEST_CODE_GIS_SAVE_PASSWORD = 2 /* unique request id */
     }
 }
