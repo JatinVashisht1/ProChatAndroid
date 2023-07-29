@@ -41,11 +41,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    LoginScreenParent(oneTapClient = oneTapClient)
+                    LoginScreenParent()
                 }
             }
         }
     }
+
 
 
     companion object {

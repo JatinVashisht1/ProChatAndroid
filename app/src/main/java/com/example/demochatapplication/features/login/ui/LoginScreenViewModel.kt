@@ -1,14 +1,17 @@
 package com.example.demochatapplication.features.login.ui
 
+import android.app.Application
 import android.content.Intent
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.demochatapplication.ChatApplication
 import com.example.demochatapplication.features.login.core.UnsuccessfulLoginException
 import com.example.demochatapplication.features.login.domain.model.SignInBodyEntity
 import com.example.demochatapplication.features.login.domain.repository.IAuthenticationRepository
 import com.example.demochatapplication.features.login.ui.uiState.LoginScreenState
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SavePasswordRequest
 import com.google.android.gms.auth.api.identity.SignInPassword
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,24 +23,23 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginScreenViewModel @Inject constructor(
     private val authenticationRepository: IAuthenticationRepository,
+    private val chatApplication: Application,
 ) : ViewModel() {
 
     val loginScreenState = mutableStateOf(LoginScreenState())
     val showHintPicker = mutableStateOf(false)
     val getPassword = mutableStateOf(false)
-    lateinit var signInRequest: BeginSignInRequest
+    val signInRequest: BeginSignInRequest = BeginSignInRequest.builder()
+        .setPasswordRequestOptions(
+            BeginSignInRequest.PasswordRequestOptions.builder()
+                .setSupported(true)
+                .build()
+        )
+        // Automatically sign in when exactly one credential is retrieved.
+        .setAutoSelectEnabled(true)
+        .build()
 
-    init {
-        signInRequest = BeginSignInRequest.builder()
-            .setPasswordRequestOptions(
-                BeginSignInRequest.PasswordRequestOptions.builder()
-                    .setSupported(true)
-                    .build()
-            )
-            // Automatically sign in when exactly one credential is retrieved.
-            .setAutoSelectEnabled(true)
-            .build()
-    }
+    val signInClient = Identity.getSignInClient(chatApplication)
 
     fun onShowHintPickerEventOver() {
         showHintPicker.value = false
@@ -55,6 +57,7 @@ class LoginScreenViewModel @Inject constructor(
 
     fun onLoginButtonClicked() {
         viewModelScope.launch {
+            showHintPicker.value = true
             val username = loginScreenState.value.usernameTextFieldState.text
             val password = loginScreenState.value.passwordTextFieldState.text
             try {
@@ -69,7 +72,6 @@ class LoginScreenViewModel @Inject constructor(
             } catch (unsuccessfulLoginException: UnsuccessfulLoginException) {
                 Timber.tag(TAG).d("Unable to login: ${unsuccessfulLoginException.message}")
             }
-            showHintPicker.value = true
         }
     }
 

@@ -1,5 +1,6 @@
 package com.example.demochatapplication.features.login.ui
 
+import android.app.Activity
 import android.content.IntentSender
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -14,23 +15,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat.startIntentSenderForResult
-import androidx.core.app.ActivityOptionsCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.demochatapplication.MainActivity
 import com.example.demochatapplication.core.CustomPaddingValues.MEDIUM
 import com.example.demochatapplication.core.CustomPaddingValues.SMALL
 import com.example.demochatapplication.features.login.ui.LoginScreenViewModel.Companion.REQUEST_CODE_GIS_SAVE_PASSWORD
 import com.example.demochatapplication.features.login.ui.components.LoginScreenTextFieldComposable
 import com.example.demochatapplication.features.login.ui.uiState.LoginScreenState
 import com.google.android.gms.auth.api.identity.*
-import com.google.android.gms.common.api.ApiException
 import timber.log.Timber
 
 
 @Composable
 fun LoginScreenParent(
     loginScreenViewModel: LoginScreenViewModel = hiltViewModel(),
-    oneTapClient: SignInClient,
 ) {
     val loginScreenState by remember { loginScreenViewModel.loginScreenState }
     val showHintPicker = remember { loginScreenViewModel.showHintPicker }
@@ -39,7 +36,7 @@ fun LoginScreenParent(
 
     LoginScreen(
         signInRequest = loginScreenViewModel.signInRequest,
-        oneTapClient = oneTapClient,
+        oneTapClient = loginScreenViewModel.signInClient,
         showHintPicker = showHintPicker.value,
         getPassword = getPassword.value,
         savePasswordRequest = loginScreenViewModel.getSavePasswordRequest(
@@ -54,6 +51,9 @@ fun LoginScreenParent(
         onGetPasswordButtonClicked = {
             loginScreenViewModel.getPassword.value = true
         },
+        onSavePasswordRequestCompleted = {
+            loginScreenViewModel.showHintPicker.value = false
+        }
     ) {
         loginScreenViewModel.getPassword.value = false
     }
@@ -73,17 +73,31 @@ fun LoginScreen(
     onPasswordTextFieldChanged: (newPasswordString: String) -> Unit,
     onGetPasswordButtonClicked: () -> Unit,
     onLoginButtonClicked: () -> Unit,
+    onSavePasswordRequestCompleted: () -> Unit,
     onPasswordGettingCompleted: () -> Unit,
 ) {
     val launchActivityForResult = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartIntentSenderForResult()
     ) {
         val requestCode = it.resultCode
-        Timber.tag(HOME_SCREEN_TAG).d("password is ${oneTapClient.getSignInCredentialFromIntent(it.data).password}")
+        Timber.tag(HOME_SCREEN_TAG)
+            .d("password is ${oneTapClient.getSignInCredentialFromIntent(it.data).password}")
     }
+
+    val launchSavePasswordRequest = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult(),
+    ) {result ->
+        val requestCode = result.resultCode
+        Timber.tag(HOME_SCREEN_TAG)
+            .d("password is $requestCode ${Activity.RESULT_OK}"
+//                    "${oneTapClient.getSignInCredentialFromIntent(result.data).password}"
+            )
+    }
+
     LaunchedEffect(key1 = showHintPicker, key2 = getPassword) {
         if (showHintPicker) {
-            showSavePasswordPrompt(activity = activity, savePasswordRequest = savePasswordRequest)
+            showSavePasswordPrompt(activity = activity, savePasswordRequest = savePasswordRequest, launchSavePasswordRequest = launchSavePasswordRequest)
+            onSavePasswordRequestCompleted()
         }
 
         if (getPassword) {
@@ -143,7 +157,7 @@ fun LoginScreen(
     }
 }
 
-const val HOME_SCREEN_TAG = "homescreen"
+const val HOME_SCREEN_TAG = "loginscreentag"
 const val REQ_ONE_TAP = 2
 
 fun beginSignIn(
@@ -151,8 +165,7 @@ fun beginSignIn(
     signInRequest: BeginSignInRequest,
     activity: ComponentActivity,
     launchActivityForResult: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>,
-
-    ) {
+) {
     oneTapClient.beginSignIn(signInRequest)
         .addOnSuccessListener(activity) { result ->
             try {
@@ -174,26 +187,36 @@ fun beginSignIn(
         }
 }
 
-fun showSavePasswordPrompt(activity: ComponentActivity, savePasswordRequest: SavePasswordRequest) {
+fun showSavePasswordPrompt(
+    activity: ComponentActivity,
+    savePasswordRequest: SavePasswordRequest,
+    launchSavePasswordRequest: ManagedActivityResultLauncher<IntentSenderRequest, ActivityResult>
+) {
     Identity.getCredentialSavingClient(activity)
         .savePassword(savePasswordRequest)
         .addOnSuccessListener { result ->
             Timber.tag(HOME_SCREEN_TAG).d("result is $result")
 
-            startIntentSenderForResult(
-                activity,
-                result.pendingIntent.intentSender,
-                REQUEST_CODE_GIS_SAVE_PASSWORD,
-                /* fillInIntent = */
-                null,
-                /* flagsMask = */
-                0,
-                /* flagsValues = */
-                0,
-                /* extraFlags = */
-                0,
-                /* options = */
-                null,
-            )
+            val intentSenderRequest =
+                IntentSenderRequest.Builder(result.pendingIntent)
+                    .build()
+
+            launchSavePasswordRequest.launch(intentSenderRequest);
+
+//            startIntentSenderForResult(
+//                activity,
+//                result.pendingIntent.intentSender,
+//                REQUEST_CODE_GIS_SAVE_PASSWORD,
+//                /* fillInIntent = */
+//                null,
+//                /* flagsMask = */
+//                0,
+//                /* flagsValues = */
+//                0,
+//                /* extraFlags = */
+//                0,
+//                /* options = */
+//                null,
+//            )
         }
 }
