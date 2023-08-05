@@ -8,6 +8,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import com.example.demochatapplication.core.CustomPaddingValues
 
+/**
+ * A reusable composable for rendering an OutlinedTextField for the login screen.
+ *
+ * @param value The current value of the text field.
+ * @param modifier The modifier for the text field.
+ * @param placeholder A composable function to display the placeholder text when the text field is empty.
+ * @param label A composable function to display the label for the text field.
+ * @param onValueChange A callback function to handle changes to the text field value.
+ */
 @Composable
 fun LoginScreenTextFieldComposable(
     value: String,
@@ -19,7 +28,7 @@ fun LoginScreenTextFieldComposable(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier,
+        modifier = modifier.fillMaxWidth().padding(horizontal = CustomPaddingValues.SMALL),
         placeholder = placeholder,
         label = label,
     )

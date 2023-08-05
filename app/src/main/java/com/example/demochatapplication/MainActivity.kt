@@ -11,7 +11,6 @@ import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
 import com.example.demochatapplication.core.Constants
 import com.example.demochatapplication.features.login.ui.LoginScreenParent
-import com.example.demochatapplication.features.login.ui.REQ_ONE_TAP
 import com.example.demochatapplication.features.login.ui.SocketTester
 import com.example.demochatapplication.ui.theme.DemoChatApplicationTheme
 import com.google.android.gms.auth.api.identity.Identity
@@ -41,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    LoginScreenParent()
+                    LoginScreenParent(context = this)
                 }
             }
         }

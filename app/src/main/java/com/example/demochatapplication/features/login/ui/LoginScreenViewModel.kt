@@ -1,11 +1,10 @@
 package com.example.demochatapplication.features.login.ui
 
 import android.app.Application
-import android.content.Intent
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.demochatapplication.ChatApplication
 import com.example.demochatapplication.features.login.core.UnsuccessfulLoginException
 import com.example.demochatapplication.features.login.domain.model.SignInBodyEntity
 import com.example.demochatapplication.features.login.domain.repository.IAuthenticationRepository
@@ -27,8 +26,13 @@ class LoginScreenViewModel @Inject constructor(
 ) : ViewModel() {
 
     val loginScreenState = mutableStateOf(LoginScreenState())
-    val showHintPicker = mutableStateOf(false)
-    val getPassword = mutableStateOf(false)
+
+    private val _showSavePasswordOneTapUi = mutableStateOf(false)
+    val showSavePasswordOneTapUi: State<Boolean> = _showSavePasswordOneTapUi
+
+    private val _getPassword = mutableStateOf(true)
+    val getPassword: State<Boolean> = _getPassword
+
     val signInRequest: BeginSignInRequest = BeginSignInRequest.builder()
         .setPasswordRequestOptions(
             BeginSignInRequest.PasswordRequestOptions.builder()
@@ -42,7 +46,7 @@ class LoginScreenViewModel @Inject constructor(
     val signInClient = Identity.getSignInClient(chatApplication)
 
     fun onShowHintPickerEventOver() {
-        showHintPicker.value = false
+        _showSavePasswordOneTapUi.value = false
     }
 
     fun getSavePasswordRequest(username: String, password: String): SavePasswordRequest {
@@ -57,7 +61,7 @@ class LoginScreenViewModel @Inject constructor(
 
     fun onLoginButtonClicked() {
         viewModelScope.launch {
-            showHintPicker.value = true
+            _showSavePasswordOneTapUi.value = true
             val username = loginScreenState.value.usernameTextFieldState.text
             val password = loginScreenState.value.passwordTextFieldState.text
             try {
@@ -86,6 +90,18 @@ class LoginScreenViewModel @Inject constructor(
         loginScreenState.value = loginScreenState.value.copy(
             passwordTextFieldState = loginScreenState.value.passwordTextFieldState.copy(text = newPasswordString)
         )
+    }
+
+    fun onGetPasswordButtonClicked() {
+        _getPassword.value = true
+    }
+
+    fun onSavePasswordRequestComplete() {
+        _showSavePasswordOneTapUi.value = false
+    }
+
+    fun onPasswordGettingCompleted() {
+        _getPassword.value = false
     }
 
     companion object {
