@@ -9,6 +9,7 @@ import com.example.demochatapplication.features.login.core.UnsuccessfulLoginExce
 import com.example.demochatapplication.features.login.domain.model.SignInBodyEntity
 import com.example.demochatapplication.features.login.domain.repository.IAuthenticationRepository
 import com.example.demochatapplication.features.login.ui.uiState.LoginScreenState
+import com.example.demochatapplication.features.login.ui.uiState.PasswordTextFieldProperties
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SavePasswordRequest
@@ -25,45 +26,17 @@ class LoginScreenViewModel @Inject constructor(
     private val chatApplication: Application,
 ) : ViewModel() {
 
-    val loginScreenState = mutableStateOf(LoginScreenState())
 
-    private val _showSavePasswordOneTapUi = mutableStateOf(false)
-    val showSavePasswordOneTapUi: State<Boolean> = _showSavePasswordOneTapUi
+    private val _loginScreenState = mutableStateOf(LoginScreenState())
+    val loginScreenState: State<LoginScreenState> = _loginScreenState
 
-    private val _getPassword = mutableStateOf(true)
-    val getPassword: State<Boolean> = _getPassword
-
-    val signInRequest: BeginSignInRequest = BeginSignInRequest.builder()
-        .setPasswordRequestOptions(
-            BeginSignInRequest.PasswordRequestOptions.builder()
-                .setSupported(true)
-                .build()
-        )
-        // Automatically sign in when exactly one credential is retrieved.
-        .setAutoSelectEnabled(true)
-        .build()
-
-    val signInClient = Identity.getSignInClient(chatApplication)
-
-    fun onShowHintPickerEventOver() {
-        _showSavePasswordOneTapUi.value = false
-    }
-
-    fun getSavePasswordRequest(username: String, password: String): SavePasswordRequest {
-        val signInPassword = SignInPassword(username, password);
-        val savePasswordRequest =
-            SavePasswordRequest.builder()
-                .setSignInPassword(signInPassword)
-                .build()
-
-        return savePasswordRequest
-    }
+    private val _passwordTextFieldProperties = mutableStateOf(PasswordTextFieldProperties())
+    val passwordTextFieldProperties: State<PasswordTextFieldProperties> = _passwordTextFieldProperties
 
     fun onLoginButtonClicked() {
         viewModelScope.launch {
-            _showSavePasswordOneTapUi.value = true
-            val username = loginScreenState.value.usernameTextFieldState.text
-            val password = loginScreenState.value.passwordTextFieldState.text
+            val username = _loginScreenState.value.usernameTextFieldState.text
+            val password = _loginScreenState.value.passwordTextFieldState.text
             try {
                 val signInUserResponseEntity = authenticationRepository.signInUser(
                     SignInBodyEntity(
@@ -81,28 +54,17 @@ class LoginScreenViewModel @Inject constructor(
 
     fun onUsernameTextFieldChange(newUsernameString: String) {
         Timber.tag(TAG).d("new username string $newUsernameString")
-        loginScreenState.value = loginScreenState.value.copy(
-            usernameTextFieldState = loginScreenState.value.usernameTextFieldState.copy(text = newUsernameString)
+        _loginScreenState.value = _loginScreenState.value.copy(
+            usernameTextFieldState = _loginScreenState.value.usernameTextFieldState.copy(text = newUsernameString)
         )
     }
 
     fun onPasswordTextFieldChange(newPasswordString: String) {
-        loginScreenState.value = loginScreenState.value.copy(
-            passwordTextFieldState = loginScreenState.value.passwordTextFieldState.copy(text = newPasswordString)
+        _loginScreenState.value = _loginScreenState.value.copy(
+            passwordTextFieldState = _loginScreenState.value.passwordTextFieldState.copy(text = newPasswordString)
         )
     }
 
-    fun onGetPasswordButtonClicked() {
-        _getPassword.value = true
-    }
-
-    fun onSavePasswordRequestComplete() {
-        _showSavePasswordOneTapUi.value = false
-    }
-
-    fun onPasswordGettingCompleted() {
-        _getPassword.value = false
-    }
 
     companion object {
         const val TAG = "loginscreenviewmodel"

@@ -2,10 +2,15 @@ package com.example.demochatapplication.features.login.ui.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.example.demochatapplication.core.CustomPaddingValues
 
 /**
@@ -18,9 +23,9 @@ import com.example.demochatapplication.core.CustomPaddingValues
  * @param onValueChange A callback function to handle changes to the text field value.
  */
 @Composable
-fun LoginScreenTextFieldComposable(
-    value: String,
+fun UsernameTextFieldComposable(
     modifier: Modifier = Modifier,
+    value: String,
     placeholder: @Composable () -> Unit,
     label: @Composable () -> Unit,
     onValueChange: (newValue: String) -> Unit,
@@ -28,8 +33,30 @@ fun LoginScreenTextFieldComposable(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.fillMaxWidth().padding(horizontal = CustomPaddingValues.SMALL),
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = CustomPaddingValues.SMALL),
         placeholder = placeholder,
         label = label,
+    )
+}
+
+@Composable
+fun PasswordTextFieldComposable(
+    modifier: Modifier = Modifier,
+    showPassword: Boolean = false,
+    password: String = "",
+    placeholder: @Composable () -> Unit,
+    label: @Composable () -> Unit,
+    onPasswordValueChange: (newPasswordValue: String) -> Unit,
+) {
+    OutlinedTextField(
+        modifier = modifier,
+        value = password,
+        onValueChange = onPasswordValueChange,
+        placeholder = placeholder,
+        label = label,
+        keyboardOptions = KeyboardOptions(keyboardType = if (showPassword) KeyboardType.Text else KeyboardType.Password),
+        visualTransformation = PasswordVisualTransformation('*')
     )
 }

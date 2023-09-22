@@ -5,3 +5,7 @@ data class LoginScreenTextFieldState(
     val placeholder: String = "",
     val label: String = "",
 )
+
+data class PasswordTextFieldProperties(
+    var showPassword: Boolean = false,
+)
