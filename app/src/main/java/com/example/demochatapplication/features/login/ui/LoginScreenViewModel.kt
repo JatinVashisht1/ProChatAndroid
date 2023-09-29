@@ -1,8 +1,11 @@
 package com.example.demochatapplication.features.login.ui
 
 import android.app.Application
+import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.demochatapplication.features.login.core.UnsuccessfulLoginException
@@ -10,11 +13,10 @@ import com.example.demochatapplication.features.login.domain.model.SignInBodyEnt
 import com.example.demochatapplication.features.login.domain.repository.IAuthenticationRepository
 import com.example.demochatapplication.features.login.ui.uiState.LoginScreenState
 import com.example.demochatapplication.features.login.ui.uiState.PasswordTextFieldProperties
-import com.google.android.gms.auth.api.identity.BeginSignInRequest
-import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.auth.api.identity.SavePasswordRequest
-import com.google.android.gms.auth.api.identity.SignInPassword
+import com.example.demochatapplication.features.shared.usersettings.UserSettings
+import com.example.demochatapplication.features.shared.usersettings.UserSettingsSerializer
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -23,9 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginScreenViewModel @Inject constructor(
     private val authenticationRepository: IAuthenticationRepository,
-    private val chatApplication: Application,
 ) : ViewModel() {
-
 
     private val _loginScreenState = mutableStateOf(LoginScreenState())
     val loginScreenState: State<LoginScreenState> = _loginScreenState
@@ -33,7 +33,7 @@ class LoginScreenViewModel @Inject constructor(
     private val _passwordTextFieldProperties = mutableStateOf(PasswordTextFieldProperties())
     val passwordTextFieldProperties: State<PasswordTextFieldProperties> = _passwordTextFieldProperties
 
-    fun onLoginButtonClicked() {
+    fun onLoginButtonClicked(datastore: DataStore<UserSettings>) {
         viewModelScope.launch {
             val username = _loginScreenState.value.usernameTextFieldState.text
             val password = _loginScreenState.value.passwordTextFieldState.text
@@ -43,6 +43,13 @@ class LoginScreenViewModel @Inject constructor(
                         username = username,
                         password = password,
                     )
+                )
+
+                saveUserInfo(
+                    datastore = datastore,
+                    username = _loginScreenState.value.usernameTextFieldState.text,
+                    password = _loginScreenState.value.passwordTextFieldState.text,
+                    token = signInUserResponseEntity.token,
                 )
 
                 Timber.tag(TAG).d("SignIn Response is $signInUserResponseEntity")
@@ -65,9 +72,24 @@ class LoginScreenViewModel @Inject constructor(
         )
     }
 
+    private fun saveUserInfo(datastore: DataStore<UserSettings>, token: String, username: String, password: String,) {
+        viewModelScope.launch {
+            datastore.updateData {
+                UserSettings(
+                    username = username,
+                    password = password,
+                    token = token,
+                )
+            }
+
+            datastore.data.collectLatest {
+                Timber.tag(TAG).d("updated info: $it")
+            }
+        }
+    }
 
     companion object {
         const val TAG = "loginscreenviewmodel"
-        const val REQUEST_CODE_GIS_SAVE_PASSWORD = 2 /* unique request id */
+        const val USER_SETTINGS_FILE_NAME = "user_settings.json"
     }
 }

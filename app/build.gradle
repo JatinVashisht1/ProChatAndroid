@@ -3,6 +3,7 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'com.google.dagger.hilt.android'
     id 'kotlin-kapt'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.9.0'
 }
 
 android {
@@ -47,7 +48,7 @@ android {
         }
     }
 
-    configurations.all {
+    configurations.configureEach {
         resolutionStrategy {
             eachDependency {
                 if ((requested.group == "org.jetbrains.kotlin") && (requested.name.startsWith("kotlin-stdlib"))) {
@@ -122,6 +123,13 @@ dependencies {
 
     // google play services for smart lock
     implementation 'com.google.android.gms:play-services-auth:20.6.0'
+
+    // datastore preferences
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+    // kotlin serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1")
+
 
 }
 

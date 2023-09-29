@@ -33,9 +33,7 @@ fun UsernameTextFieldComposable(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = CustomPaddingValues.SMALL),
+        modifier = modifier,
         placeholder = placeholder,
         label = label,
     )

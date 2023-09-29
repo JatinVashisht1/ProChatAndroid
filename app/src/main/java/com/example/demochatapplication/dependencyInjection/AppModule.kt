@@ -11,14 +11,14 @@ import com.example.demochatapplication.features.login.data.repository.Authentica
 import com.example.demochatapplication.features.login.domain.model.SignInBodyEntity
 import com.example.demochatapplication.features.login.domain.model.SignInResponseEntity
 import com.example.demochatapplication.features.login.domain.repository.IAuthenticationRepository
+import com.example.demochatapplication.features.shared.cryptomanager.CryptoManager
+import com.example.demochatapplication.features.shared.usersettings.UserSettingsSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -59,5 +59,12 @@ object AppModule {
             signInDtoAndEntityMapper = signInDtoAndEntityMapper,
             signInResponseDtoAndEntityMapper = signInResponseDtoAndEntityMapper
         );
+
+    @Provides()
+    @Singleton()
+    fun providesCryptoManager(): CryptoManager = CryptoManager()
+
+    fun providesUserSettingsSerializer(cryptoManager: CryptoManager): UserSettingsSerializer =
+        UserSettingsSerializer(cryptoManager = cryptoManager)
 
 }
