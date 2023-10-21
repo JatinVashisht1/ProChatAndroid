@@ -1,4 +1,4 @@
-package com.example.demochatapplication.features.login.ui.uiState
+package com.example.demochatapplication.features.login.ui.uistate
 
 data class LoginScreenState(
     val usernameTextFieldState: LoginScreenTextFieldState = LoginScreenTextFieldState(

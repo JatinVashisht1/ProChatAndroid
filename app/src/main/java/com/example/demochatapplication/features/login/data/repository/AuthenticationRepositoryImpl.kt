@@ -6,7 +6,7 @@ import com.example.demochatapplication.features.login.data.dto.SignInBodyDto
 import com.example.demochatapplication.features.login.data.dto.SignInResponseDto
 import com.example.demochatapplication.features.login.data.mapper.SignInDtoAndEntityMapper
 import com.example.demochatapplication.features.login.data.mapper.SignInResponseDtoAndEntityMapper
-import com.example.demochatapplication.features.login.data.remote.ChatApi
+import com.example.demochatapplication.core.remote.ChatApi
 import com.example.demochatapplication.features.login.domain.model.SignInBodyEntity
 import com.example.demochatapplication.features.login.domain.model.SignInResponseEntity
 import com.example.demochatapplication.features.login.domain.repository.IAuthenticationRepository

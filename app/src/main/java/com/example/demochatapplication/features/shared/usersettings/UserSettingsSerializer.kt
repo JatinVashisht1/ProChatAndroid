@@ -16,7 +16,8 @@ class UserSettingsSerializer @Inject constructor(
         get() = UserSettings()
 
     override suspend fun readFrom(input: InputStream): UserSettings {
-        val decryptedBytes = cryptoManager.decrypt(inputStream = input)
+//        val decryptedBytes = cryptoManager.decrypt(inputStream = input)
+        val decryptedBytes = input.readBytes()
         return try {
             Json.decodeFromString(
                 deserializer = UserSettings.serializer(),
@@ -29,14 +30,18 @@ class UserSettingsSerializer @Inject constructor(
     }
 
     override suspend fun writeTo(t: UserSettings, output: OutputStream) {
-        val inputBytes = Json.encodeToString(
+        Json.encodeToString(
             serializer = UserSettings.serializer(),
             value = t
-        )
+        ).toByteArray()
 
-        cryptoManager.encrypt(
-            bytes = inputBytes.encodeToByteArray(),
-            outputStream = output,
-        )
+//        cryptoManager.encrypt(
+//            bytes = inputBytes.encodeToByteArray(),
+//            outputStream = output,
+//        )
+    }
+
+    companion object {
+        const val USER_SETTINGS_FILE_NAME = "user_settings"
     }
 }
