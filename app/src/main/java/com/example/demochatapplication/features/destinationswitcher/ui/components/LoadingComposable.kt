@@ -22,8 +22,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -43,45 +49,39 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.example.demochatapplication.features.login.ui.utils.PaddingValues as MyPaddingValues
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.lang.Float.min
 
 @Composable
-fun LoadingComposable(modifier: Modifier = Modifier, animatedFloat: Float) {
-    val scope = rememberCoroutineScope()
+fun LoadingComposable(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "")
-    val infiniteTransition = rememberInfiniteTransition(label = "")
-    val color by infiniteTransition.animateColor(
-        initialValue = Color.Red,
-        targetValue = Color.Green,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ), label = ""
-    )
     BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
-        val maxDimension = min(maxHeight.value, maxWidth.value)
-        val circleRadius = remember { mutableStateOf((maxDimension / 10).dp) }
-        var isSmall = true
-        var seconds = 50
-
-
         val scale by transition.animateFloat(
             initialValue = 1f,
-            targetValue = 1.5f,
+            targetValue = 1.2f,
             animationSpec = infiniteRepeatable(
-                animation = tween(durationMillis = 1500),
-                repeatMode = RepeatMode.Restart
+                animation = tween(durationMillis = 1000),
+                repeatMode = RepeatMode.Reverse
             ), label = ""
         )
 
-        DotComposable(
+        LazyRow(
             modifier = Modifier
-                .size(64.dp)
-                .scale(scale),
-            circleColor = color
-        )
+                .align(Alignment.Center),
+            verticalAlignment = Alignment.CenterVertically,
+            contentPadding = PaddingValues(MyPaddingValues.MEDIUM)
+        ) {
+            items(3) {
+                DotComposable(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .scale(scale),
+                )
+                Spacer(modifier = Modifier.width(MyPaddingValues.LARGE))
+            }
+        }
     }
 }
 
@@ -96,8 +96,4 @@ fun DotComposable(
             drawCircle(color = circleColor, circleRadius)
         }
     }
-}
-
-private enum class ImageState {
-    Small, Large
 }

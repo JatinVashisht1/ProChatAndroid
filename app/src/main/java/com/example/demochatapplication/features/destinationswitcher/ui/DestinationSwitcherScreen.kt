@@ -44,21 +44,23 @@ fun DestinationSwitcherScreen(
     navController: NavHostController
 ) {
     
-    val infiniteTransition = rememberInfiniteTransition(label = "infinite transition")
-    val color by infiniteTransition.animateColor(
-        initialValue = Color.Red,
-        targetValue = Color.Yellow,
-        animationSpec = infiniteRepeatable(
-            tween(durationMillis = 1500, easing = LinearEasing)
-        ), label = ""
-    )
+//    val infiniteTransition = rememberInfiniteTransition(label = "infinite transition")
+//    val color by infiniteTransition.animateColor(
+//        initialValue = Color.Red,
+//        targetValue = Color.Yellow,
+//        animationSpec = infiniteRepeatable(
+//            tween(durationMillis = 1500, easing = LinearEasing),
+//            repeatMode = RepeatMode.Reverse
+//        ), label = "",
+//
+//    )
+//
+//    Box(modifier = Modifier
+//        .fillMaxSize()
+//        .drawBehind { drawRect(color) }
+//    )
     
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .drawBehind { drawRect(color) }
-    )
-    
-    /*
+
     val destinationSwitcherState = destinationSwitcherViewModel.destinationSwitcherState.value
 //    Timber.tag("destinationswitcherscreen").d(datastore.readBytes().decodeToString())
     val animatedFloat = remember { Animatable(0f) }
@@ -99,17 +101,15 @@ fun DestinationSwitcherScreen(
             DestinationSwitcherScreenState.Loading -> {
                 LoadingComposable(
                     modifier = Modifier.fillMaxSize(),
-                    animatedFloat = animatedFloat.value,
                 )
             }
             DestinationSwitcherScreenState.Success -> {
                 LoadingComposable(
                     modifier = Modifier.fillMaxSize(),
-                    animatedFloat = animatedFloat.value,
                 )
             }
         }
     }
     
-     */
+
 }
