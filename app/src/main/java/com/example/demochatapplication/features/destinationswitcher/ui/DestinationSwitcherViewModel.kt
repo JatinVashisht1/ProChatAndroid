@@ -44,7 +44,8 @@ class DestinationSwitcherViewModel @Inject constructor(
                     Timber.tag(TAG).d("user settings are: $userSettings")
                     _destinationScreenState.value = DestinationSwitcherScreenState.Success
                     if (userSettings.username.isNotBlank() && userSettings.password.isNotBlank() && userSettings.token.isNotBlank()) {
-                        sendUiEvents(UiEvents.NavigateTo(Destinations.ChatScreen.route))
+//                        sendUiEvents(UiEvents.NavigateTo(Destinations.ChatScreen.route))
+                        sendUiEvents(UiEvents.NavigateTo(Destinations.AccountsScreen.route))
                     } else {
                         sendUiEvents(UiEvents.NavigateTo(Destinations.LoginScreen.route))
                     }

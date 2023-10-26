@@ -1,4 +1,4 @@
-package com.example.demochatapplication.features.accounts.data.dto
+package com.example.demochatapplication.core.remote.dto
 
 data class SearchUserResponseDto(
     val searchString: String,

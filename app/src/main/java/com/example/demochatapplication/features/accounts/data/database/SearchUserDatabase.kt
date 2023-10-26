@@ -3,13 +3,13 @@ package com.example.demochatapplication.features.accounts.data.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.example.demochatapplication.features.accounts.data.database.dao.SearchUserDao
-import com.example.demochatapplication.features.accounts.data.database.entities.SearchUserEntity
+import com.example.demochatapplication.features.accounts.data.database.entities.AccountsUserEntity
 
 /**
  * Created by Jatin Vashisht on 17-10-2023.
  */
 
-@Database(entities = [SearchUserEntity::class], version = 1)
+@Database(entities = [AccountsUserEntity::class], version = 1)
 abstract class SearchUserDatabase: RoomDatabase() {
     abstract val searchUserDao: SearchUserDao
 

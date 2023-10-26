@@ -1,12 +1,10 @@
 package com.example.demochatapplication.features.accounts.data.database.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy.Companion.IGNORE
-import androidx.room.OnConflictStrategy.Companion.REPLACE
 import androidx.room.Query
-import com.example.demochatapplication.features.accounts.data.database.entities.SearchUserEntity
+import com.example.demochatapplication.features.accounts.data.database.entities.AccountsUserEntity
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -15,15 +13,18 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SearchUserDao {
-    @Query("SELECT * FROM searchusertable")
-    suspend fun getAllUsers(): List<SearchUserEntity>
+    @Query("SELECT * FROM accountsusertable")
+    fun getAllUsers(): Flow<List<AccountsUserEntity>>
 
-    @Query("SELECT * FROM searchusertable WHERE username LIKE '%' || :username || '%'")
-    suspend fun searchUserFromDatabase(username: String): List<SearchUserEntity>
+    @Query("SELECT * FROM accountsusertable WHERE username LIKE '%' || :username || '%'")
+    suspend fun searchUserFromDatabase(username: String): List<AccountsUserEntity>
 
-    @Query("DELETE from searchusertable WHERE username = :username")
+    @Query("DELETE from accountsusertable WHERE username = :username")
     suspend fun deleteUsername(username: String)
 
     @Insert(onConflict = IGNORE)
-    suspend fun insertUsers(vararg searchUserEntity: SearchUserEntity)
+    suspend fun insertUsers(vararg accountsUserEntity: AccountsUserEntity)
+
+    @Query("SELECT COUNT(*) FROM accountsusertable")
+    suspend fun getUserAccountsCount(): Int
 }

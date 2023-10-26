@@ -7,8 +7,8 @@ import androidx.room.PrimaryKey
  * Created by Jatin Vashisht on 17-10-2023.
  */
 
-@Entity("searchusertable")
-data class SearchUserEntity(
+@Entity("accountsusertable")
+data class AccountsUserEntity(
     val username: String,
     @PrimaryKey(autoGenerate = true)
     val primaryId: Int?,

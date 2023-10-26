@@ -10,18 +10,18 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.demochatapplication.features.accounts.ui.AccountsScreenParent
 import com.example.demochatapplication.features.chat.ui.ChatScreen
 import com.example.demochatapplication.features.destinationswitcher.ui.DestinationSwitcherScreen
 import com.example.demochatapplication.features.login.ui.LoginScreenParent
-import com.example.demochatapplication.features.shared.SocketTester
+import com.example.demochatapplication.features.shared.SocketManager
 import com.example.demochatapplication.features.shared.navigation.Destinations
 import com.example.demochatapplication.ui.theme.DemoChatApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    val socketTester = SocketTester
+    val socketTester = SocketManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -43,14 +43,18 @@ class MainActivity : ComponentActivity() {
                             DestinationSwitcherScreen(navController = navController)
                         }
 
-
-
                         composable(Destinations.LoginScreen.route) {
                             LoginScreenParent(navHostController = navController)
                         }
 
                         composable(Destinations.ChatScreen.route) {
                             ChatScreen()
+                        }
+
+                        composable(Destinations.AccountsScreen.route) {
+                            AccountsScreenParent(
+                                navHostController = navController
+                            )
                         }
                     }
                 }

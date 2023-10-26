@@ -1,57 +1,108 @@
 package com.example.demochatapplication.features.accounts.data.repository
 
+import android.accounts.NetworkErrorException
 import com.example.demochatapplication.core.Mapper
 import com.example.demochatapplication.core.Resource
 import com.example.demochatapplication.core.remote.ChatApi
+import com.example.demochatapplication.core.remote.dto.SearchUserBodyDto
 import com.example.demochatapplication.core.remote.util.getResponseBody
 import com.example.demochatapplication.features.accounts.data.database.SearchUserDatabase
 import com.example.demochatapplication.features.accounts.data.database.dao.SearchUserDao
-import com.example.demochatapplication.features.accounts.data.database.entities.SearchUserEntity
-import com.example.demochatapplication.features.accounts.data.dto.SearchUserBodyDto
+import com.example.demochatapplication.features.accounts.data.database.entities.AccountsUserEntity
 import com.example.demochatapplication.features.accounts.domain.model.UserModel
-import com.example.demochatapplication.features.accounts.domain.repository.SearchUserRepository
+import com.example.demochatapplication.features.accounts.domain.repository.AccountsUserRepository
+import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combineTransform
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.IOException
 import java.net.SocketTimeoutException
+import java.util.UUID
 import javax.inject.Inject
 
 /**
  * Created by Jatin Vashisht on 19-10-2023.
  */
-class SearchUserRepositoryImpl @Inject constructor(
+
+class AccountsScreenRepositoryImpl @Inject constructor(
     private val searchUserDatabase: SearchUserDatabase,
-    private val searchUserEntityAndModelMapper: Mapper<SearchUserEntity, UserModel>,
-    private val chatApi: ChatApi
+    private val accountsUserEntityAndModelMapper: Mapper<AccountsUserEntity, UserModel>,
+    private val chatApi: ChatApi,
+    private val userSettingsRepository: UserSettingsRepository,
 ) :
-    SearchUserRepository {
+    AccountsUserRepository {
 
     private var searchUserDao: SearchUserDao = searchUserDatabase.searchUserDao
 
     private var getListFrom = 0
 
-    override suspend fun getAllUsers(): Flow<Resource<List<UserModel>>> = flow {
-        emit(Resource.Loading<List<UserModel>>())
-        try {
-            val searchUserModelList = searchUserDao.getAllUsers().map { searchUserEntity ->
-                searchUserEntityAndModelMapper.mapAtoB(searchUserEntity)
+    private lateinit var authorizationHeader: String
+
+    val searchUserEntityList = searchUserDao.getAllUsers()
+
+    private val users =
+        MutableStateFlow<Resource<List<UserModel>>>(Resource.Loading<List<UserModel>>())
+
+    init {
+        CoroutineScope(Dispatchers.IO).launch {
+            authorizationHeader = userSettingsRepository.getFirstEntry().token
+        }
+    }
+
+    override suspend fun getAllUsers(shouldLoadFromNetwork: Boolean): Flow<List<UserModel>> {
+        val accountsCount = searchUserDao.getUserAccountsCount()
+
+        if (shouldLoadFromNetwork || accountsCount == 0) {
+            Timber.tag(TAG).d("authorizationheader: $authorizationHeader")
+            val chatAccountsResponse =
+                chatApi.getChatAccounts(authorizationHeader = authorizationHeader)
+
+            val isSuccessful = chatAccountsResponse.isSuccessful
+
+            if (!isSuccessful) {
+                throw NetworkErrorException("Unable to fetch data from server. Please try again later")
             }
 
-            emit(Resource.Success<List<UserModel>>(result = searchUserModelList))
-        } catch (unknownException: Exception) {
-            Timber.tag(TAG).d(unknownException.toString())
-            emit(Resource.Error<List<UserModel>>(UNKNOWN_EXCEPTION_MESSAGE))
+            val chatAccountsDto = chatAccountsResponse.body()
+
+            Timber.tag(TAG)
+                .d("chataccountsdto: $chatAccountsDto, isSuccessful: $isSuccessful, raw: ${chatAccountsResponse.raw()}")
+
+            val accountsUserEntity = chatAccountsDto?.accounts?.map { account ->
+                AccountsUserEntity(username = account.username ?: "", primaryId = null)
+            }
+                ?.toTypedArray()
+
+
+
+            accountsUserEntity?.let {
+                searchUserDao.insertUsers(*it)
+            }
         }
+
+        val userModelFlow = searchUserDao.getAllUsers()
+            .map { accountUserEntityList ->
+                val accountsModelList = accountUserEntityList.map {
+                    accountsUserEntityAndModelMapper.mapAtoB(it)
+                }
+
+                return@map accountsModelList
+            }
+
+        return userModelFlow
     }
 
     @Throws(Exception::class)
     suspend fun searchUserFromDatabase(username: String): List<UserModel> {
         try {
             val userEntityList = searchUserDao.searchUserFromDatabase(username = username)
-            val userModelList = userEntityList.map{ userEntity-> searchUserEntityAndModelMapper.mapAtoB(userEntity) }
+            val userModelList = userEntityList.map { userEntity ->
+                accountsUserEntityAndModelMapper.mapAtoB(userEntity)
+            }
 
             return userModelList
 
@@ -64,7 +115,10 @@ class SearchUserRepositoryImpl @Inject constructor(
     @Throws(IOException::class, SocketTimeoutException::class)
     suspend fun searchUserFromServer(username: String): List<UserModel> {
         val searchUserBodyDto = SearchUserBodyDto(username = username)
-        val searchUserResponse = chatApi.searchUser(searchUserBodyDto = searchUserBodyDto)
+        val searchUserResponse = chatApi.searchUser(
+            searchUserBodyDto = searchUserBodyDto,
+            authorizationHeader = authorizationHeader
+        )
         val isRequestSuccessful = searchUserResponse.isSuccessful
 
         if (isRequestSuccessful) {
@@ -86,11 +140,10 @@ class SearchUserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchUser(username: String): List<UserModel> {
-
         try {
             val usersFromServer = searchUserFromServer(username = username)
                 .map {
-                    searchUserEntityAndModelMapper.mapBtoA(it)
+                    accountsUserEntityAndModelMapper.mapBtoA(it)
                 }.toTypedArray()
 
             searchUserDao.insertUsers(*usersFromServer)
@@ -114,12 +167,13 @@ class SearchUserRepositoryImpl @Inject constructor(
 
     override suspend fun insertUser(userModel: UserModel) {
         try {
-            val searchUserEntity = searchUserEntityAndModelMapper.mapBtoA(userModel)
+            val searchUserEntity = accountsUserEntityAndModelMapper.mapBtoA(userModel)
             searchUserDao.insertUsers(searchUserEntity)
         } catch (e: Exception) {
             Timber.tag(TAG).d(e.toString())
         }
     }
+
 
     companion object {
         const val IO_EXCEPTION_MESSAGE = "unable to load data, please try again later"

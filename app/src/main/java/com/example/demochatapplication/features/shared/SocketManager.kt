@@ -5,10 +5,8 @@ import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import org.json.JSONArray
 import org.json.JSONObject
-import timber.log.Timber
-import java.net.URISyntaxException
 
-object SocketTester {
+object SocketManager {
     const val TAG = "sockettester"
 
     val mSocket: Socket by lazy { IO.socket(Constants.SERVER_URL) }

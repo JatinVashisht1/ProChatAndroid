@@ -2,7 +2,7 @@ package com.example.demochatapplication.features.accounts.data.pagination
 
 import com.example.demochatapplication.features.accounts.domain.model.UserModel
 import com.example.demochatapplication.features.accounts.domain.pagination.Paginator
-import com.example.demochatapplication.features.accounts.domain.repository.SearchUserRepository
+import com.example.demochatapplication.features.accounts.domain.repository.AccountsUserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import timber.log.Timber
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Inject
  * Created by Jatin Vashisht on 20-10-2023.
  */
 class SearchUserPaginator @Inject() constructor(
-    private val searchUserRepository: SearchUserRepository
+    private val accountsUserRepository: AccountsUserRepository
 ) : Paginator<List<UserModel>> {
     override val result: MutableStateFlow<List<UserModel>> = MutableStateFlow(emptyList())
     var currentIndex = 0
@@ -19,7 +19,7 @@ class SearchUserPaginator @Inject() constructor(
         username: String,
     ) {
         try {
-            val userModelList = searchUserRepository.searchUser(username = username,)
+            val userModelList = accountsUserRepository.searchUser(username = username,)
             val userModelListSize = userModelList.size
             val oldList = result.value
 

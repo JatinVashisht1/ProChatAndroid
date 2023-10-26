@@ -10,18 +10,20 @@ import com.example.demochatapplication.features.login.data.mapper.SignInDtoAndEn
 import com.example.demochatapplication.features.login.data.mapper.SignInResponseDtoAndEntityMapper
 import com.example.demochatapplication.core.remote.ChatApi
 import com.example.demochatapplication.features.accounts.data.database.SearchUserDatabase
-import com.example.demochatapplication.features.accounts.data.database.entities.SearchUserEntity
+import com.example.demochatapplication.features.accounts.data.database.entities.AccountsUserEntity
 import com.example.demochatapplication.features.accounts.data.mapper.SearchUserEntityAndModelMapper
 import com.example.demochatapplication.features.accounts.data.pagination.SearchUserPaginator
-import com.example.demochatapplication.features.accounts.data.repository.SearchUserRepositoryImpl
+import com.example.demochatapplication.features.accounts.data.repository.AccountsScreenRepositoryImpl
 import com.example.demochatapplication.features.accounts.domain.model.UserModel
 import com.example.demochatapplication.features.accounts.domain.pagination.Paginator
-import com.example.demochatapplication.features.accounts.domain.repository.SearchUserRepository
+import com.example.demochatapplication.features.accounts.domain.repository.AccountsUserRepository
+import com.example.demochatapplication.features.accounts.domain.usecase.ObserveAllUsersUseCase
 import com.example.demochatapplication.features.login.data.repository.AuthenticationRepositoryImpl
 import com.example.demochatapplication.features.login.domain.model.SignInBodyEntity
 import com.example.demochatapplication.features.login.domain.model.SignInResponseEntity
 import com.example.demochatapplication.features.login.domain.repository.IAuthenticationRepository
 import com.example.demochatapplication.features.shared.cryptomanager.CryptoManager
+import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsSerializer
 import dagger.Module
 import dagger.Provides
@@ -56,7 +58,7 @@ object AppModule {
         SignInResponseDtoAndEntityMapper()
 
     @Provides()
-    fun providesSearchUserEntityAndModelMapper(): Mapper<SearchUserEntity, UserModel> =
+    fun providesSearchUserEntityAndModelMapper(): Mapper<AccountsUserEntity, UserModel> =
         SearchUserEntityAndModelMapper()
 
     @Provides()
@@ -95,17 +97,24 @@ object AppModule {
     @Singleton()
     fun providesSearchUserRepository(
         searchUserDatabase: SearchUserDatabase,
-        searchUserEntityAndModelMapper: Mapper<SearchUserEntity, UserModel>,
+        accountsUserEntityAndModelMapper: Mapper<AccountsUserEntity, UserModel>,
         chatApi: ChatApi,
-    ): SearchUserRepository = SearchUserRepositoryImpl(
+        userSettingsRepository: UserSettingsRepository,
+    ): AccountsUserRepository = AccountsScreenRepositoryImpl(
         searchUserDatabase = searchUserDatabase,
-        searchUserEntityAndModelMapper = searchUserEntityAndModelMapper,
+        accountsUserEntityAndModelMapper = accountsUserEntityAndModelMapper,
         chatApi = chatApi,
+        userSettingsRepository = userSettingsRepository,
     )
 
     @Provides()
     @Singleton()
     @Named(Constants.SEARCH_USER_PAGINATOR)
-    fun providesPaginator(searchUserRepository: SearchUserRepository): Paginator<List<UserModel>> =
-        SearchUserPaginator(searchUserRepository = searchUserRepository)
+    fun providesPaginator(accountsUserRepository: AccountsUserRepository): Paginator<List<UserModel>> =
+        SearchUserPaginator(accountsUserRepository = accountsUserRepository)
+
+    @Provides()
+    @Singleton()
+    fun providesObserveAllUsersUseCase(accountsUserRepository: AccountsUserRepository): ObserveAllUsersUseCase =
+        ObserveAllUsersUseCase(accountsUserRepository = accountsUserRepository)
 }
