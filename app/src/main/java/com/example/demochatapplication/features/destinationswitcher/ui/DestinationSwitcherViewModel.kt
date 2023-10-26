@@ -12,10 +12,13 @@ import com.example.demochatapplication.features.shared.navigation.Destinations
 import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import timber.log.Timber
 import java.io.File
@@ -37,17 +40,19 @@ class DestinationSwitcherViewModel @Inject constructor(
     }
     private fun checkLoginStatus() {
         _destinationScreenState.value = DestinationSwitcherScreenState.Loading
-        viewModelScope.launch {
+        viewModelScope.launch(IO) {
             try {
 //                val userSettings = userSettingsRepository.getFirstEntry()
                 userSettingsRepository.userSettings.collectLatest { userSettings->
                     Timber.tag(TAG).d("user settings are: $userSettings")
                     _destinationScreenState.value = DestinationSwitcherScreenState.Success
-                    if (userSettings.username.isNotBlank() && userSettings.password.isNotBlank() && userSettings.token.isNotBlank()) {
-//                        sendUiEvents(UiEvents.NavigateTo(Destinations.ChatScreen.route))
-                        sendUiEvents(UiEvents.NavigateTo(Destinations.AccountsScreen.route))
-                    } else {
-                        sendUiEvents(UiEvents.NavigateTo(Destinations.LoginScreen.route))
+                    withContext(Main) {
+                        if (userSettings.username.isNotBlank() && userSettings.password.isNotBlank() && userSettings.token.isNotBlank()) {
+    //                        sendUiEvents(UiEvents.NavigateTo(Destinations.ChatScreen.route))
+                            sendUiEvents(UiEvents.NavigateTo(Destinations.AccountsScreen.route))
+                        } else {
+                            sendUiEvents(UiEvents.NavigateTo(Destinations.LoginScreen.route))
+                        }
                     }
                 }
             } catch (e: Exception) {
@@ -61,10 +66,14 @@ class DestinationSwitcherViewModel @Inject constructor(
         viewModelScope.launch {
             when(uiEvent) {
                 is UiEvents.NavigateTo -> {
-                    uiEvents.send(uiEvent)
+//                    uiEvents.send(uiEvent)
                 }
             }
         }
+    }
+
+    fun onRetryButtonClicked () {
+        checkLoginStatus()
     }
 
     companion object {

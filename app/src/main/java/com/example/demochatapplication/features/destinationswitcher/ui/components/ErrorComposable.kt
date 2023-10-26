@@ -10,11 +10,15 @@ import androidx.compose.ui.Modifier
 import com.example.demochatapplication.features.login.ui.utils.PaddingValues
 
 @Composable
-fun ErrorComposable(modifier: Modifier = Modifier, reason: String, ) {
+fun ErrorComposable(
+    modifier: Modifier = Modifier,
+    reason: String,
+    onRetryClicked: () -> Unit
+) {
     Column(modifier = modifier) {
         Text(text = reason)
         Spacer(modifier = Modifier.height(PaddingValues.LARGE))
-        Button(onClick = {  }) {
+        Button(onClick = onRetryClicked) {
             Text(text = "Retry")
         }
 
