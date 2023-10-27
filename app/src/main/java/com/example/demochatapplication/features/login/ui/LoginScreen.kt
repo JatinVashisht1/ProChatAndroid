@@ -55,10 +55,7 @@ fun LoginScreenParent(
             onPasswordValueChange = loginScreenViewModel::onPasswordTextFieldChange,
             passwordTextFieldProperties = loginScreenViewModel.passwordTextFieldProperties.value,
             passwordTextFieldState = loginScreenViewModel.loginScreenState.value.passwordTextFieldState,
-            onLoginButtonClicked = {
-                Toast.makeText(context, "Clicked", Toast.LENGTH_LONG).show()
-                loginScreenViewModel.onLoginButtonClicked()
-            }
+            onLoginButtonClicked = loginScreenViewModel::onLoginButtonClicked,
         )
 
     }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -27,8 +28,13 @@ class ObserveAllUsersUseCase @Inject constructor(
                         userModelState.value = Resource.Success(result = it)
                     }
             } catch (e: Exception) {
+                Timber.tag(TAG).d("unable to get all users: $e\n${e.localizedMessage}")
                 userModelState.value = Resource.Error(error = e.message ?: "Something went wrong")
             }
         }
+    }
+
+    companion object {
+        const val TAG = "observeallusersusecase"
     }
 }

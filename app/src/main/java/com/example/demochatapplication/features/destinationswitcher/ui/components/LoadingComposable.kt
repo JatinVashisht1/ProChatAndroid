@@ -1,62 +1,44 @@
 package com.example.demochatapplication.features.destinationswitcher.ui.components
 
-import androidx.compose.animation.Animatable
 import androidx.compose.animation.animateColor
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationConstants
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.repeatable
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
-import com.example.demochatapplication.features.login.ui.utils.PaddingValues as MyPaddingValues
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.lang.Float.min
 
 @Composable
 fun LoadingComposable(modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "")
+    val fontColor by transition.animateColor(
+        initialValue = Color.Yellow,
+        targetValue = Color.Transparent,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = ""
+    )
+
     BoxWithConstraints(modifier = modifier, contentAlignment = Alignment.Center) {
         val scale by transition.animateFloat(
             initialValue = 1f,
@@ -67,33 +49,75 @@ fun LoadingComposable(modifier: Modifier = Modifier) {
             ), label = ""
         )
 
-        LazyRow(
-            modifier = Modifier
-                .align(Alignment.Center),
-            verticalAlignment = Alignment.CenterVertically,
-            contentPadding = PaddingValues(MyPaddingValues.MEDIUM)
-        ) {
-            items(3) {
-                DotComposable(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .scale(scale),
-                )
-                Spacer(modifier = Modifier.width(MyPaddingValues.LARGE))
-            }
+        Column(modifier = Modifier.align(Alignment.Center)) {
+            Text(
+                text = "Checking credentials...",
+                style = MaterialTheme
+                    .typography.h5
+                    .copy(fontFamily = FontFamily.Monospace, color = fontColor),
+            )
+            LoadingAnimation(
+                modifier = Modifier
+                    .size(192.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
         }
     }
 }
 
 @Composable
-fun DotComposable(
+fun LoadingAnimation(
     modifier: Modifier = Modifier,
-    circleColor: Color = Color(221, 44, 0, 255)
+    color: Color = Color(221, 44, 0, 255)
 ) {
-    Box(modifier = modifier) {
+    val infiniteTransition = rememberInfiniteTransition("")
+    val scaleDotOne by infiniteTransition.animateFloat(
+        initialValue = 10f,
+        targetValue = 20f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, 50),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+
+    val scaleDotTwo by infiniteTransition.animateFloat(
+        initialValue = 10f,
+        targetValue = 20f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, 150),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+
+    val scaleDotThree by infiniteTransition.animateFloat(
+        initialValue = 10f,
+        targetValue = 20f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, 250),
+            repeatMode = RepeatMode.Reverse
+        ), label = ""
+    )
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val circleRadius = size.maxDimension / 2.0f
-            drawCircle(color = circleColor, circleRadius)
+            drawCircle(
+                color = color,
+                radius = scaleDotOne.dp.toPx(),
+                center = Offset(16.dp.toPx(), 24.dp.toPx()),
+            )
+            drawCircle(
+                color = color,
+                radius = scaleDotTwo.dp.toPx(),
+                center = Offset(64.dp.toPx(), 24.dp.toPx())
+            )
+            drawCircle(
+                color = color,
+                radius = scaleDotThree.dp.toPx(),
+                center = Offset(112.dp.toPx(), 24.dp.toPx())
+            )
         }
     }
 }

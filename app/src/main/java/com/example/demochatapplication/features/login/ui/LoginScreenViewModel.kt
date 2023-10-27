@@ -14,6 +14,7 @@ import com.example.demochatapplication.features.shared.navigation.Destinations
 import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -31,14 +32,16 @@ class LoginScreenViewModel @Inject constructor(
     val loginScreenState: State<LoginScreenState> = _loginScreenState
 
     private val _passwordTextFieldProperties = mutableStateOf(PasswordTextFieldProperties())
-    val passwordTextFieldProperties: State<PasswordTextFieldProperties> = _passwordTextFieldProperties
+    val passwordTextFieldProperties: State<PasswordTextFieldProperties> =
+        _passwordTextFieldProperties
 
     val uiEvents = Channel<UiEvents>()
 
     fun onLoginButtonClicked() {
-        viewModelScope.launch {
+        viewModelScope.launch(IO) {
             val username = _loginScreenState.value.usernameTextFieldState.text
             val password = _loginScreenState.value.passwordTextFieldState.text
+
             try {
                 val signInUserResponseEntity = authenticationRepository.signInUser(
                     SignInBodyEntity(
@@ -55,7 +58,7 @@ class LoginScreenViewModel @Inject constructor(
 
                 Timber.tag(TAG).d("SignIn Response is $signInUserResponseEntity")
 
-                onEvent(UiEvents.NavigateTo(Destinations.ChatScreen.route))
+                onEvent(UiEvents.NavigateTo(Destinations.AccountsScreen.route))
 
             } catch (unsuccessfulLoginException: UnsuccessfulLoginException) {
                 Timber.tag(TAG).d("Unable to login: ${unsuccessfulLoginException.message}")
@@ -76,22 +79,18 @@ class LoginScreenViewModel @Inject constructor(
         )
     }
 
-    private fun saveUserInfo(token: String, username: String, password: String,) {
-//        Timber.tag(TAG).d("entered save use info function")
-        viewModelScope.launch {
-            userSettingsRepository.writeUserSettings(UserSettings(username = username, password = password, token = token))
-
-            userSettingsRepository.userSettings.collectLatest {
-                Timber.tag(TAG).d("user settings are $it")
-            }
-
-        }
+    private suspend fun saveUserInfo(token: String, username: String, password: String) {
+        userSettingsRepository.writeUserSettings(
+            UserSettings(
+                username = username,
+                password = password,
+                token = token
+            )
+        )
     }
 
-    private fun onEvent(event: UiEvents) {
-        viewModelScope.launch {
+    private suspend fun onEvent(event: UiEvents) {
             uiEvents.send(event)
-        }
     }
 
     companion object {
@@ -100,5 +99,5 @@ class LoginScreenViewModel @Inject constructor(
 }
 
 sealed interface UiEvents {
-    data class NavigateTo(val destination: String): UiEvents
+    data class NavigateTo(val destination: String) : UiEvents
 }
