@@ -6,27 +6,27 @@ package com.example.demochatapplication.features.accounts.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.demochatapplication.core.Constants
 import com.example.demochatapplication.core.Resource
 import com.example.demochatapplication.features.accounts.domain.model.UserModel
-import com.example.demochatapplication.features.accounts.domain.pagination.Paginator
 import com.example.demochatapplication.features.accounts.domain.usecase.ObserveAllUsersUseCase
 import com.example.demochatapplication.features.accounts.ui.components.AccountsScreenState
 import com.example.demochatapplication.features.accounts.ui.components.SearchUsersComponentState
+import com.example.demochatapplication.features.shared.navigation.Destinations
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Named
 
 @HiltViewModel()
 class AccountsScreenViewModel @Inject constructor(
     private val observeAllUsersUseCase: ObserveAllUsersUseCase,
 ) : ViewModel() {
+    val accountScreenEvents = Channel<AccountScreenEvents>()
+
+
     private val _accountsScreenState =
         MutableStateFlow<AccountsScreenState>(AccountsScreenState(loading = false))
     val accountsScreenState: StateFlow<AccountsScreenState> get() = _accountsScreenState.asStateFlow()
@@ -41,9 +41,22 @@ class AccountsScreenViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            observeAllUsersUseCase()
+            observeAllUsersUseCase(shouldLoadFromNetwork = true)
         }
     }
 
+    private suspend fun sendEvent(event: AccountScreenEvents) {
+        accountScreenEvents.send(event)
+    }
 
+    fun onChatAccountItemClicked(anotherUsername: String) {
+        viewModelScope.launch {
+            val destination = Destinations.ChatScreen.route + "/$anotherUsername"
+            sendEvent(AccountScreenEvents.NavigateTo(destination = destination))
+        }
+    }
+}
+
+sealed interface AccountScreenEvents {
+    data class NavigateTo(val destination: String): AccountScreenEvents
 }

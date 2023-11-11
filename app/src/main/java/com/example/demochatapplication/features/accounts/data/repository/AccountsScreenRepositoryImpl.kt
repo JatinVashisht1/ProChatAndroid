@@ -7,7 +7,7 @@ import com.example.demochatapplication.core.remote.ChatApi
 import com.example.demochatapplication.core.remote.dto.SearchUserBodyDto
 import com.example.demochatapplication.core.remote.util.getResponseBody
 import com.example.demochatapplication.features.accounts.data.database.SearchUserDatabase
-import com.example.demochatapplication.features.accounts.data.database.dao.SearchUserDao
+import com.example.demochatapplication.features.accounts.data.database.dao.AccountUserDao
 import com.example.demochatapplication.features.accounts.data.database.entities.AccountsUserEntity
 import com.example.demochatapplication.features.accounts.domain.model.UserModel
 import com.example.demochatapplication.features.accounts.domain.repository.AccountsUserRepository
@@ -21,7 +21,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.IOException
 import java.net.SocketTimeoutException
-import java.util.UUID
 import javax.inject.Inject
 
 /**
@@ -36,13 +35,13 @@ class AccountsScreenRepositoryImpl @Inject constructor(
 ) :
     AccountsUserRepository {
 
-    private var searchUserDao: SearchUserDao = searchUserDatabase.searchUserDao
+    private var accountUserDao: AccountUserDao = searchUserDatabase.accountUserDao
 
     private var getListFrom = 0
 
     private lateinit var authorizationHeader: String
 
-    val searchUserEntityList = searchUserDao.getAllUsers()
+    val searchUserEntityList = accountUserDao.getAllUsers()
 
     private val users =
         MutableStateFlow<Resource<List<UserModel>>>(Resource.Loading<List<UserModel>>())
@@ -54,7 +53,7 @@ class AccountsScreenRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getAllUsers(shouldLoadFromNetwork: Boolean): Flow<List<UserModel>> {
-        val accountsCount = searchUserDao.getUserAccountsCount()
+        val accountsCount = accountUserDao.getUserAccountsCount()
 
         if (shouldLoadFromNetwork || accountsCount == 0) {
             Timber.tag(TAG).d("authorizationheader: $authorizationHeader")
@@ -80,11 +79,11 @@ class AccountsScreenRepositoryImpl @Inject constructor(
 
 
             accountsUserEntity?.let {
-                searchUserDao.insertUsers(*it)
+                accountUserDao.insertUsers(*it)
             }
         }
 
-        val userModelFlow = searchUserDao.getAllUsers()
+        val userModelFlow = accountUserDao.getAllUsers()
             .map { accountUserEntityList ->
                 val accountsModelList = accountUserEntityList.map {
                     accountsUserEntityAndModelMapper.mapAtoB(it)
@@ -99,7 +98,7 @@ class AccountsScreenRepositoryImpl @Inject constructor(
     @Throws(Exception::class)
     suspend fun searchUserFromDatabase(username: String): List<UserModel> {
         try {
-            val userEntityList = searchUserDao.searchUserFromDatabase(username = username)
+            val userEntityList = accountUserDao.searchUserFromDatabase(username = username)
             val userModelList = userEntityList.map { userEntity ->
                 accountsUserEntityAndModelMapper.mapAtoB(userEntity)
             }
@@ -146,7 +145,7 @@ class AccountsScreenRepositoryImpl @Inject constructor(
                     accountsUserEntityAndModelMapper.mapBtoA(it)
                 }.toTypedArray()
 
-            searchUserDao.insertUsers(*usersFromServer)
+            accountUserDao.insertUsers(*usersFromServer)
         } catch (e: Exception) {
             Timber.tag(TAG).d(e.toString())
         }
@@ -158,7 +157,7 @@ class AccountsScreenRepositoryImpl @Inject constructor(
     @Throws(Exception::class)
     override suspend fun deleteUser(username: String) {
         try {
-            searchUserDao.deleteUsername(username = username)
+            accountUserDao.deleteUsername(username = username)
         } catch (e: Exception) {
             Timber.tag(TAG).d(e.toString())
             throw (e)
@@ -168,7 +167,7 @@ class AccountsScreenRepositoryImpl @Inject constructor(
     override suspend fun insertUser(userModel: UserModel) {
         try {
             val searchUserEntity = accountsUserEntityAndModelMapper.mapBtoA(userModel)
-            searchUserDao.insertUsers(searchUserEntity)
+            accountUserDao.insertUsers(searchUserEntity)
         } catch (e: Exception) {
             Timber.tag(TAG).d(e.toString())
         }

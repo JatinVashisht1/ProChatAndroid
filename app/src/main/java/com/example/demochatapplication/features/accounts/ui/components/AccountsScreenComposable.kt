@@ -1,6 +1,7 @@
 package com.example.demochatapplication.features.accounts.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,20 +24,24 @@ import com.example.demochatapplication.features.login.ui.utils.PaddingValues as 
 fun AccountsScreenComposable(
     modifier: Modifier = Modifier,
     accounts: List<UserModel>,
-    lazyColumnState: LazyListState = rememberLazyListState()
+    lazyColumnState: LazyListState = rememberLazyListState(),
+    onChatAccountClicked: (String) -> Unit,
 ) {
     LazyColumn(
         modifier = modifier,
         state = lazyColumnState,
-        contentPadding = PaddingValues(all = MyPaddingValues.MEDIUM)
+        contentPadding = PaddingValues(all = MyPaddingValues.MEDIUM),
     ) {
-        items(accounts) {userModel->
+        items(accounts) { userModel ->
             AccountItemComposable(
                 userModel = userModel,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp)
                     .background(color = MaterialTheme.colors.background)
+                    .clickable {
+                        onChatAccountClicked(userModel.username)
+                    }
             )
         }
     }

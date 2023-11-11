@@ -8,4 +8,11 @@ data class CornerRoundnessDpValues(
     val topEnd: Dp = 0.dp,
     val bottomStart: Dp = 0.dp,
     val bottomEnd: Dp = 0.dp,
-)
+) {
+    fun getSimpleRoundedCornerValues(): CornerRoundnessDpValues = CornerRoundnessDpValues(
+        topStart = 10.dp,
+        topEnd = 10.dp,
+        bottomStart = 10.dp,
+        bottomEnd = 10.dp
+    )
+}

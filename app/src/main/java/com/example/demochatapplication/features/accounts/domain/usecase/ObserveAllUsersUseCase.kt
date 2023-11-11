@@ -29,7 +29,7 @@ class ObserveAllUsersUseCase @Inject constructor(
                     }
             } catch (e: Exception) {
                 Timber.tag(TAG).d("unable to get all users: $e\n${e.localizedMessage}")
-                userModelState.value = Resource.Error(error = e.message ?: "Something went wrong")
+                userModelState.value = Resource.Error(error = e.localizedMessage ?: "Something went wrong")
             }
         }
     }
