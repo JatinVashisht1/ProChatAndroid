@@ -15,7 +15,7 @@ import com.example.demochatapplication.features.chat.data.database.entity.ChatDb
 @Dao
 interface ChatDao {
 
-    @Query("SELECT * FROM chatdbentity WHERE (`from` = :username1 AND `to` = :username2) OR (`from` = :username2 AND `to` = :username1)")
+    @Query("SELECT * FROM chatdbentity WHERE (`from` = :username1 AND `to` = :username2) OR (`from` = :username2 AND `to` = :username1) ORDER BY `timeStamp` ASC")
     suspend fun getChatBetween2Users(username1: String, username2: String): List<ChatDbEntity>
 
     @Query("SELECT COUNT(*) FROM chatdbentity WHERE (`from` = :username1 AND `to` = :username2) OR (`from` = :username2 AND `to` = :username1)")
@@ -35,6 +35,9 @@ interface ChatDao {
 
     @Query("DELETE FROM chatdbentity where (`from` = :username1 AND `to` = :username2) OR (`from` = :username2 AND `to` = :username1)")
     suspend fun clearChatMessagesBetween2Users(username1: String, username2: String)
+
+    @Query("SELECT COUNT(*) FROM chatdbentity WHERE primaryKey = :messageId")
+    suspend fun doesMessageExist(messageId: String): Int
 
     @Transaction()
     suspend fun deleteAndInsertChats(

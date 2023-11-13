@@ -53,6 +53,8 @@ fun ChatScreen(
     val sendMessageTextFieldState by chatScreenViewModel.sendMessageTextFieldState.collectAsState()
     val textMessages = chatScreenViewModel.textMessageListState
     val anotherUsername = chatScreenViewModel.anotherUsernameState.collectAsState().value
+    val chatMessagesListState = rememberLazyListState()
+
 
     Surface(color = MaterialTheme.colors.background) {
         Box(
@@ -80,6 +82,7 @@ fun ChatScreen(
                         textMessages = textMessages,
                         username = userCredentials.username,
                         anotherUsername = anotherUsername,
+                        chatMessagesListState = chatMessagesListState,
                     )
                 }
             }
@@ -96,16 +99,19 @@ fun ChatScreenContent(
     onSendTextMessageButtonClicked: () -> Unit,
     textMessages: List<ChatModel>,
     anotherUsername: String,
-    lazyListState: LazyListState = rememberLazyListState(),
+    chatMessagesListState: LazyListState = rememberLazyListState(),
 ) {
     val roundedCornerDpValues = remember {
         CornerRoundnessDpValues().getSimpleRoundedCornerValues()
     }
+
+
     Column(modifier = modifier) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
                 .fillMaxHeight(0.85f),
+            state = chatMessagesListState,
         ) {
             items(items = textMessages) { chatModel ->
                 ChatMessageCard(

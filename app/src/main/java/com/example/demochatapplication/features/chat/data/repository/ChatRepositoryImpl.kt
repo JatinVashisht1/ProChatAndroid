@@ -82,6 +82,8 @@ class ChatRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun doesMessageExist(messageId: String): Int = chatDao.doesMessageExist(messageId = messageId)
+
     override suspend fun getChatBetween2Users(
         currentUsername: String,
         anotherUsername: String,

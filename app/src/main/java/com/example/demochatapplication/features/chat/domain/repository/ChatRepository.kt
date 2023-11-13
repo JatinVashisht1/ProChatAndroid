@@ -10,4 +10,6 @@ interface ChatRepository {
     suspend fun insertChatMessage(chatMessage: ChatModel)
 
     suspend fun insertChatMessage(chatMessage: List<ChatModel>)
+
+    suspend fun doesMessageExist(messageId: String): Int
 }

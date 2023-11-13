@@ -2,8 +2,8 @@ package com.example.demochatapplication.core
 
 object Constants {
 //    const val SERVER_URL = "http://192.168.107.145:5000"
-    const val SERVER_URL = "http://192.168.228.145:5000"
-//    const val SERVER_URL = "http://192.168.26.145:5000"
+//    const val SERVER_URL = "http://192.168.228.145:5000"
+    const val SERVER_URL = "http://192.168.26.145:5000"
 //    const val SERVER_URL = "http://192.168.102.145:5000"
 //    const val SERVER_URL = "http://192.168.1.5:5000"
     const val SIGN_IN_DTO_AND_ENTITY_MAPPER = "signindtoandentitymapper"
