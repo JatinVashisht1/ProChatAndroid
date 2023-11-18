@@ -28,6 +28,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -36,6 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.demochatapplication.features.chat.domain.model.ChatModel
 import com.example.demochatapplication.features.chat.ui.components.ChatMessageCard
 import com.example.demochatapplication.features.chat.ui.components.SendMessageTextField
@@ -44,6 +48,7 @@ import com.example.demochatapplication.features.chat.ui.uistate.SendMessageTextF
 import com.example.demochatapplication.features.chat.ui.utils.CornerRoundnessDpValues
 import com.example.demochatapplication.features.login.ui.utils.PaddingValues
 import com.example.demochatapplication.ui.theme.DarkMessageCardBackgroundSender
+import timber.log.Timber
 
 @Composable
 fun ChatScreen(
@@ -51,9 +56,13 @@ fun ChatScreen(
 ) {
     val userCredentials = chatScreenViewModel.userSettingsStateFlow.collectAsState().value
     val sendMessageTextFieldState by chatScreenViewModel.sendMessageTextFieldState.collectAsState()
-    val textMessages = chatScreenViewModel.textMessageListState
+    val textMessages = chatScreenViewModel.textMessageListState.collectAsLazyPagingItems()
     val anotherUsername = chatScreenViewModel.anotherUsernameState.collectAsState().value
     val chatMessagesListState = rememberLazyListState()
+
+    SideEffect {
+        Timber.tag(TAG).d("text messages count: ${textMessages.itemCount}")
+    }
 
 
     Surface(color = MaterialTheme.colors.background) {
@@ -72,18 +81,31 @@ fun ChatScreen(
                 }
 
                 is ChatScreenState.Success -> {
-                    ChatScreenContent(
-                        textFieldState = sendMessageTextFieldState,
-                        onTypingMessageValueChange = chatScreenViewModel::onSendTextFieldValueChange,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(PaddingValues.MEDIUM),
-                        onSendTextMessageButtonClicked = chatScreenViewModel::onSendChatMessageClicked,
-                        textMessages = textMessages,
-                        username = userCredentials.username,
-                        anotherUsername = anotherUsername,
-                        chatMessagesListState = chatMessagesListState,
-                    )
+
+                    when (textMessages.loadState.refresh) {
+                        is LoadState.Error -> {
+
+                        }
+
+                        LoadState.Loading -> {
+
+                        }
+
+                        is LoadState.NotLoading -> {
+                            ChatScreenContent(
+                                textFieldState = sendMessageTextFieldState,
+                                onTypingMessageValueChange = chatScreenViewModel::onSendTextFieldValueChange,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(PaddingValues.MEDIUM),
+                                onSendTextMessageButtonClicked = chatScreenViewModel::onSendChatMessageClicked,
+                                textMessages = textMessages,
+                                username = userCredentials.username,
+                                anotherUsername = anotherUsername,
+                                chatMessagesListState = chatMessagesListState,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -97,7 +119,7 @@ fun ChatScreenContent(
     textFieldState: SendMessageTextFieldState,
     onTypingMessageValueChange: (String) -> Unit,
     onSendTextMessageButtonClicked: () -> Unit,
-    textMessages: List<ChatModel>,
+    textMessages: LazyPagingItems<ChatModel>,
     anotherUsername: String,
     chatMessagesListState: LazyListState = rememberLazyListState(),
 ) {
@@ -113,17 +135,19 @@ fun ChatScreenContent(
                 .fillMaxHeight(0.85f),
             state = chatMessagesListState,
         ) {
-            items(items = textMessages) { chatModel ->
-                ChatMessageCard(
-                    chatModel = chatModel,
-                    modifier = Modifier
-                        .padding(top = PaddingValues.MEDIUM)
-                        .fillMaxWidth()
-                        .wrapContentHeight(),
-                    senderBackgroundColor = MaterialTheme.colors.primary,
-                    receiverBackgroundColor = DarkMessageCardBackgroundSender,
-                    username = username,
-                )
+            items(count = textMessages.itemCount) { index ->
+                textMessages[index]?.let {
+                    ChatMessageCard(
+                        chatModel = it,
+                        modifier = Modifier
+                            .padding(top = PaddingValues.MEDIUM)
+                            .fillMaxWidth()
+                            .wrapContentHeight(),
+                        senderBackgroundColor = MaterialTheme.colors.primary,
+                        receiverBackgroundColor = DarkMessageCardBackgroundSender,
+                        username = username,
+                    )
+                }
             }
         }
 
@@ -133,7 +157,8 @@ fun ChatScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = PaddingValues.MEDIUM),
-            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             SendMessageTextField(
                 textFieldState = textFieldState,
@@ -143,7 +168,7 @@ fun ChatScreenContent(
                     .heightIn(min = 40.dp)
 //                    .weight(weight = 3f, fill = true),
             )
-            
+
             Spacer(modifier = Modifier.width(PaddingValues.MEDIUM))
 
             FloatingActionButton(
@@ -159,3 +184,5 @@ fun ChatScreenContent(
         }
     }
 }
+
+private val TAG = "chatscreentag"

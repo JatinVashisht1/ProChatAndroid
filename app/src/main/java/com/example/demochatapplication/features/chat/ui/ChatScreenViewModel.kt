@@ -1,9 +1,9 @@
 package com.example.demochatapplication.features.chat.ui
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import com.example.demochatapplication.core.Constants
 import com.example.demochatapplication.core.Mapper
 import com.example.demochatapplication.features.chat.domain.model.ChatModel
@@ -19,14 +19,13 @@ import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.socket.emitter.Emitter
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
@@ -54,8 +53,8 @@ class ChatScreenViewModel @Inject constructor(
         MutableStateFlow<SendMessageTextFieldState>(SendMessageTextFieldState())
     val sendMessageTextFieldState: StateFlow<SendMessageTextFieldState> get() = _sendMessageTextFieldState
 
-    private val _textMessagesListState = mutableStateListOf<ChatModel>()
-    val textMessageListState get() = _textMessagesListState.toList()
+    private lateinit var _textMessagesListState: Flow<PagingData<ChatModel>>
+    val textMessageListState get() = _textMessagesListState
 
     private val onChat = Emitter.Listener {
         viewModelScope.launch {
@@ -82,9 +81,9 @@ class ChatScreenViewModel @Inject constructor(
                 val messageFromAnotherUser =
                     (to == _userSettingsStateFlow.value.username && from == _anotherUsernameState.value)
 
-                if (messageFromAnotherUser || messageFromCurrentUser) {
-                    _textMessagesListState.add(chatModel)
-                }
+//                if (messageFromAnotherUser || messageFromCurrentUser) {
+//                    _textMessagesListState.add(chatModel)
+//                }
 
                 chatRepository.insertChatMessage(chatMessage = chatModel)
             }
@@ -102,26 +101,22 @@ class ChatScreenViewModel @Inject constructor(
             launch {
                 loadChatMessages()
             }
-        }
 
-        viewModelScope.launch {
             SocketManager.mSocket?.on("chat", onChat)
         }
     }
 
     private suspend fun loadChatMessages() {
 //        Timber.tag(TAG).d("entered load messages function")
-        chatRepository.getChatBetween2Users(
+        val pagedChatModelList = chatRepository.getChatBetween2Users(
             currentUsername = _userSettingsStateFlow.value.username,
             anotherUsername = _anotherUsernameState.value,
             shouldLoadFromNetwork = true
-        ).collectLatest {
-            it.forEach { chatModel ->
-                _textMessagesListState.add(chatModel)
-            }
+        )
 
-            Timber.tag(TAG).d("fetched messages: $it")
-        }
+        _textMessagesListState = pagedChatModelList
+
+//        _textMessagesListState = pagedChatModelList
     }
 
     private suspend fun setAnotherUsernameStateValue() {
@@ -194,9 +189,9 @@ class ChatScreenViewModel @Inject constructor(
                     )
                 }
 
-                withContext(Main) {
-                    _textMessagesListState.add(chatModel)
-                }
+//                withContext(Main) {
+//                    _textMessagesListState.add(chatModel)
+//                }
             }
         }
     }

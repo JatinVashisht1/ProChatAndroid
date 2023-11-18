@@ -1,5 +1,6 @@
 package com.example.demochatapplication.features.chat.data.database
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -16,7 +17,7 @@ import com.example.demochatapplication.features.chat.data.database.entity.ChatDb
 interface ChatDao {
 
     @Query("SELECT * FROM chatdbentity WHERE (`from` = :username1 AND `to` = :username2) OR (`from` = :username2 AND `to` = :username1) ORDER BY `timeStamp` ASC")
-    suspend fun getChatBetween2Users(username1: String, username2: String): List<ChatDbEntity>
+    fun getChatBetween2Users(username1: String, username2: String): PagingSource<Int, ChatDbEntity>
 
     @Query("SELECT COUNT(*) FROM chatdbentity WHERE (`from` = :username1 AND `to` = :username2) OR (`from` = :username2 AND `to` = :username1)")
     suspend fun getChatMessagesCount(username1: String, username2: String): Int

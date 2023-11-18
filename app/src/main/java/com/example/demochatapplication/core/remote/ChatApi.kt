@@ -33,10 +33,14 @@ interface ChatApi {
         @Header(Constants.AUTHORIZATION_HEADER) authorizationHeader: String,
     ): Response<GetChatAccountsDto>
 
-    @GET("/chat/getuserschat/{anotherUsername}")
+    @GET("/chat/getuserschat/{$ANOTHER_USERNAME_URL_PARAM}")
     @Headers("Content-Type: application/json")
     suspend fun getChatMessagesBetween2Users(
         @Header(Constants.AUTHORIZATION_HEADER) authorizationHeader: String,
-        @Path("anotherUsername") anotherUsername: String,
+        @Path(ANOTHER_USERNAME_URL_PARAM) anotherUsername: String,
     ): Response<GetChatMessagesBetween2UsersDto>
+
+    companion object {
+        const val ANOTHER_USERNAME_URL_PARAM = "anotherUsername"
+    }
 }

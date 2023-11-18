@@ -108,9 +108,9 @@ dependencies {
 
     // Room
     def room_version = "2.6.0"
-
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation("androidx.room:room-paging:2.6.0")
 
     // To use Kotlin annotation processing tool (kapt)
 //    ksp "androidx.room:room-compiler:$room_version"
@@ -146,6 +146,10 @@ dependencies {
     // coroutines support for room
     implementation("androidx.room:room-ktx:2.6.0")
 
+    // paging
+    def paging_version = "3.2.1"
+    implementation("androidx.paging:paging-runtime:$paging_version")
+    implementation("androidx.paging:paging-compose:$paging_version")
 
 }
 

@@ -1,6 +1,8 @@
 package com.example.demochatapplication.dependencyinjection
 
 import android.app.Application
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.room.Room
 import com.example.demochatapplication.core.Constants
 import com.example.demochatapplication.core.Mapper
@@ -9,6 +11,7 @@ import com.example.demochatapplication.features.login.data.dto.SignInResponseDto
 import com.example.demochatapplication.features.login.data.mapper.SignInDtoAndEntityMapper
 import com.example.demochatapplication.features.login.data.mapper.SignInResponseDtoAndEntityMapper
 import com.example.demochatapplication.core.remote.ChatApi
+import com.example.demochatapplication.core.remote.dto.GetChatMessagesBetween2UsersDto
 import com.example.demochatapplication.features.accounts.data.database.SearchUserDatabase
 import com.example.demochatapplication.features.accounts.data.database.entities.AccountsUserEntity
 import com.example.demochatapplication.features.accounts.data.mapper.SearchUserEntityAndModelMapper
@@ -21,7 +24,9 @@ import com.example.demochatapplication.features.accounts.domain.usecase.ObserveA
 import com.example.demochatapplication.features.chat.data.database.ChatDatabase
 import com.example.demochatapplication.features.chat.data.database.entity.ChatDbEntity
 import com.example.demochatapplication.features.chat.data.mapper.ChatDbEntityAndModelMapper
+import com.example.demochatapplication.features.chat.data.mapper.ChatMessageDtoAndDbEntityMapper
 import com.example.demochatapplication.features.chat.data.mapper.MessageDeliveryStateAndStringMapper
+import com.example.demochatapplication.features.chat.data.paging.ChatMessagesRemoteMediator
 import com.example.demochatapplication.features.chat.data.repository.ChatRepositoryImpl
 import com.example.demochatapplication.features.chat.domain.model.ChatModel
 import com.example.demochatapplication.features.chat.domain.model.MessageDeliveryState
@@ -151,11 +156,22 @@ object AppModule {
         userSettingsRepository: UserSettingsRepository,
         chatDbEntityAndModelMapper: Mapper<ChatDbEntity, ChatModel>,
         messageDeliveryStateAndStringMapper: Mapper<MessageDeliveryState, String>,
+        chatMessageDtoAndDbEntityMapper: Mapper<GetChatMessagesBetween2UsersDto, List<ChatDbEntity>>,
     ): ChatRepository = ChatRepositoryImpl(
         chatApi = chatApi,
         chatDatabase = chatDatabase,
         userSettingsRepository = userSettingsRepository,
         chatDbEntityAndModelMapper = chatDbEntityAndModelMapper,
-        messageDeliveryStateAndStringMapper = messageDeliveryStateAndStringMapper
+        messageDeliveryStateAndStringMapper = messageDeliveryStateAndStringMapper,
+        chatMessageDtoAndDbEntityMapper = chatMessageDtoAndDbEntityMapper,
     )
+
+    @Provides()
+    @Singleton()
+    fun providesGetChatMessageBetween2UsersDtoAndDbEntityMapper(
+        messageDeliveryStateAndStringMapper: Mapper<MessageDeliveryState, String>
+    ): Mapper<GetChatMessagesBetween2UsersDto, List<ChatDbEntity>> = ChatMessageDtoAndDbEntityMapper(messageDeliveryStateAndStringMapper = messageDeliveryStateAndStringMapper)
+
+
+
 }
