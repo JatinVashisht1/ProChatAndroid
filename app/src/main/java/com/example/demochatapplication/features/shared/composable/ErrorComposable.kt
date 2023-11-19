@@ -1,4 +1,4 @@
-package com.example.demochatapplication.features.accounts.ui.components
+package com.example.demochatapplication.features.shared.composable
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

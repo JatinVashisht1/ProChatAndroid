@@ -1,6 +1,5 @@
 package com.example.demochatapplication.features.accounts.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
@@ -13,8 +12,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.demochatapplication.core.Resource
 import com.example.demochatapplication.features.accounts.ui.components.AccountsScreenComposable
-import com.example.demochatapplication.features.accounts.ui.components.ErrorComposable
-import com.example.demochatapplication.features.accounts.ui.components.LoadingComposable
+import com.example.demochatapplication.features.shared.composable.ErrorComposable
+import com.example.demochatapplication.features.shared.composable.LoadingComposable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 

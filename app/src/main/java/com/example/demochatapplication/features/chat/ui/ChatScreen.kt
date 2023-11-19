@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.CircularProgressIndicator
@@ -47,6 +46,8 @@ import com.example.demochatapplication.features.chat.ui.uistate.ChatScreenState
 import com.example.demochatapplication.features.chat.ui.uistate.SendMessageTextFieldState
 import com.example.demochatapplication.features.chat.ui.utils.CornerRoundnessDpValues
 import com.example.demochatapplication.features.login.ui.utils.PaddingValues
+import com.example.demochatapplication.features.shared.composable.ErrorComposable
+import com.example.demochatapplication.features.shared.composable.LoadingComposable
 import com.example.demochatapplication.ui.theme.DarkMessageCardBackgroundSender
 import timber.log.Timber
 
@@ -59,6 +60,7 @@ fun ChatScreen(
     val textMessages = chatScreenViewModel.textMessageListState.collectAsLazyPagingItems()
     val anotherUsername = chatScreenViewModel.anotherUsernameState.collectAsState().value
     val chatMessagesListState = rememberLazyListState()
+    val chatScreenState = chatScreenViewModel.chatScreenState.collectAsState().value
 
     SideEffect {
         Timber.tag(TAG).d("text messages count: ${textMessages.itemCount}")
@@ -71,9 +73,9 @@ fun ChatScreen(
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            when (chatScreenViewModel.chatScreenState.collectAsState().value) {
+            when (chatScreenState) {
                 is ChatScreenState.Error -> {
-                    Text("Error")
+                    ErrorComposable(error = chatScreenState.errorMessage)
                 }
 
                 ChatScreenState.Loading -> {
@@ -84,11 +86,11 @@ fun ChatScreen(
 
                     when (textMessages.loadState.refresh) {
                         is LoadState.Error -> {
-
+                            ErrorComposable(error = "unable to load chat messages!")
                         }
 
                         LoadState.Loading -> {
-
+                            LoadingComposable(modifier = Modifier.size(32.dp))
                         }
 
                         is LoadState.NotLoading -> {
@@ -127,7 +129,6 @@ fun ChatScreenContent(
         CornerRoundnessDpValues().getSimpleRoundedCornerValues()
     }
 
-
     Column(modifier = modifier) {
         LazyColumn(
             modifier = Modifier
@@ -136,9 +137,9 @@ fun ChatScreenContent(
             state = chatMessagesListState,
         ) {
             items(count = textMessages.itemCount) { index ->
-                textMessages[index]?.let {
+                textMessages[index]?.let { chatModel ->
                     ChatMessageCard(
-                        chatModel = it,
+                        chatModel = chatModel,
                         modifier = Modifier
                             .padding(top = PaddingValues.MEDIUM)
                             .fillMaxWidth()
@@ -146,6 +147,16 @@ fun ChatScreenContent(
                         senderBackgroundColor = MaterialTheme.colors.primary,
                         receiverBackgroundColor = DarkMessageCardBackgroundSender,
                         username = username,
+                    )
+                }
+            }
+
+            if (textMessages.loadState.append == LoadState.Loading) {
+                item {
+                    LoadingComposable(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .align(Alignment.CenterHorizontally)
                     )
                 }
             }
@@ -166,7 +177,6 @@ fun ChatScreenContent(
                 modifier = Modifier
                     .fillMaxWidth(0.75f)
                     .heightIn(min = 40.dp)
-//                    .weight(weight = 3f, fill = true),
             )
 
             Spacer(modifier = Modifier.width(PaddingValues.MEDIUM))
@@ -174,7 +184,7 @@ fun ChatScreenContent(
             FloatingActionButton(
                 onClick = onSendTextMessageButtonClicked,
                 modifier = Modifier
-//                    .weight(weight = 1f, fill = true)
+//                    .weight(weight = 3f, fill = true),
                     .fillMaxWidth()
                     .clip(CircleShape),
                 backgroundColor = MaterialTheme.colors.primary,

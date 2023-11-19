@@ -1,6 +1,7 @@
-package com.example.demochatapplication.features.accounts.ui.components
+package com.example.demochatapplication.features.shared.composable
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
@@ -20,7 +21,7 @@ fun LoadingComposable(
         CircularProgressIndicator(
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(100.dp)
+                .fillMaxSize()
         )
     }
 }

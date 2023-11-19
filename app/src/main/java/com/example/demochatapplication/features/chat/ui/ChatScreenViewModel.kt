@@ -19,6 +19,7 @@ import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.socket.emitter.Emitter
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +41,7 @@ class ChatScreenViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val deliveryStateAndStringMapper: Mapper<MessageDeliveryState, String>,
 ) : ViewModel() {
+    private var job: Job? = null
     private val _anotherUsernameState = MutableStateFlow<String>("")
     val anotherUsernameState: StateFlow<String> get() = _anotherUsernameState.asStateFlow()
 
@@ -81,10 +83,6 @@ class ChatScreenViewModel @Inject constructor(
                 val messageFromAnotherUser =
                     (to == _userSettingsStateFlow.value.username && from == _anotherUsernameState.value)
 
-//                if (messageFromAnotherUser || messageFromCurrentUser) {
-//                    _textMessagesListState.add(chatModel)
-//                }
-
                 chatRepository.insertChatMessage(chatMessage = chatModel)
             }
         }
@@ -94,10 +92,11 @@ class ChatScreenViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             launch { fetchUserCredentials() }
-            val job1 = launch {
+            job?.cancel()
+            job = launch {
                 setAnotherUsernameStateValue()
             }
-            job1.join()
+            job?.join()
             launch {
                 loadChatMessages()
             }
@@ -188,12 +187,15 @@ class ChatScreenViewModel @Inject constructor(
                         SocketEvents.Chat.eventName, chatEventMessageJson
                     )
                 }
-
-//                withContext(Main) {
-//                    _textMessagesListState.add(chatModel)
-//                }
             }
         }
+
+
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        job?.cancel()
     }
 
     companion object {
