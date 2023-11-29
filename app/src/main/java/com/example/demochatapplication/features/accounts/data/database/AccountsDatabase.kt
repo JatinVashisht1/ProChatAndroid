@@ -10,7 +10,7 @@ import com.example.demochatapplication.features.accounts.data.database.entities.
  */
 
 @Database(entities = [AccountsUserEntity::class], version = 1)
-abstract class SearchUserDatabase: RoomDatabase() {
+abstract class AccountsDatabase: RoomDatabase() {
     abstract val accountUserDao: AccountUserDao
 
     companion object {

@@ -1,4 +1,4 @@
-package com.example.demochatapplication.features.shared.socket
+package com.example.demochatapplication.features.chat.domain.model
 
 import com.example.demochatapplication.features.chat.domain.model.MessageDeliveryState
 import kotlinx.serialization.Serializable

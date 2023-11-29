@@ -21,22 +21,26 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.demochatapplication.features.chat.domain.model.ChatModel
+import com.example.demochatapplication.features.chat.domain.model.ChatScreenUiModel
 import com.example.demochatapplication.features.chat.ui.utils.CornerRoundnessDpValues
 import com.example.demochatapplication.features.login.ui.utils.PaddingValues
 import com.example.demochatapplication.ui.theme.DarkMessageCardBackgroundSender
 import com.example.demochatapplication.ui.theme.Typography
+import java.time.Instant
 import kotlin.math.absoluteValue
 
 @Composable
 fun ChatMessageCard(
     modifier: Modifier = Modifier,
-    chatModel: ChatModel,
+    chatModel: ChatScreenUiModel.ChatModel,
     cornerRoundnessDpValues: CornerRoundnessDpValues = CornerRoundnessDpValues().getSimpleRoundedCornerValues(),
     senderBackgroundColor: Color = MaterialTheme.colors.primary,
     receiverBackgroundColor: Color = DarkMessageCardBackgroundSender,
     username: String,
 ) {
+
+    val timeCreatedMillis = chatModel.timeInMillis
+    val timeCreated = Instant.ofEpochMilli(timeCreatedMillis)
 
     val maxWidth = LocalConfiguration.current.screenWidthDp
     Box(modifier = modifier) {
@@ -76,6 +80,8 @@ fun ChatMessageCard(
                     textAlign = TextAlign.End
                 )
 
+                Spacer(modifier = Modifier.height(PaddingValues.MEDIUM))
+
             }
         }
     }
@@ -89,11 +95,11 @@ fun PreviewChatMessageCard() {
             .padding(top = PaddingValues.MEDIUM)
             .fillMaxWidth()
             .wrapContentHeight(),
-        chatModel = ChatModel(
+        chatModel = ChatScreenUiModel.ChatModel(
             from = "def",
             to = "to",
             message = "this is message that no body fucking cares of motherfucker and this is something I am writing in order to check the preview",
-            time = System.currentTimeMillis()
+            timeInMillis = System.currentTimeMillis()
 //            message = ".",
         ),
         username = "abc",

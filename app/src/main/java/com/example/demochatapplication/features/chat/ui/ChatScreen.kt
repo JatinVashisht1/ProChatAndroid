@@ -34,12 +34,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.demochatapplication.features.chat.domain.model.ChatModel
+import com.example.demochatapplication.features.chat.domain.model.ChatScreenUiModel
 import com.example.demochatapplication.features.chat.ui.components.ChatMessageCard
 import com.example.demochatapplication.features.chat.ui.components.SendMessageTextField
 import com.example.demochatapplication.features.chat.ui.uistate.ChatScreenState
@@ -49,6 +50,7 @@ import com.example.demochatapplication.features.login.ui.utils.PaddingValues
 import com.example.demochatapplication.features.shared.composable.ErrorComposable
 import com.example.demochatapplication.features.shared.composable.LoadingComposable
 import com.example.demochatapplication.ui.theme.DarkMessageCardBackgroundSender
+import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
 @Composable
@@ -99,7 +101,8 @@ fun ChatScreen(
                                 onTypingMessageValueChange = chatScreenViewModel::onSendTextFieldValueChange,
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .padding(PaddingValues.MEDIUM),
+                                    .padding(PaddingValues.MEDIUM)
+                                    .rotate(180f),
                                 onSendTextMessageButtonClicked = chatScreenViewModel::onSendChatMessageClicked,
                                 textMessages = textMessages,
                                 username = userCredentials.username,
@@ -109,6 +112,8 @@ fun ChatScreen(
                         }
                     }
                 }
+
+                else -> {}
             }
         }
     }
@@ -121,53 +126,24 @@ fun ChatScreenContent(
     textFieldState: SendMessageTextFieldState,
     onTypingMessageValueChange: (String) -> Unit,
     onSendTextMessageButtonClicked: () -> Unit,
-    textMessages: LazyPagingItems<ChatModel>,
+    textMessages: LazyPagingItems<ChatScreenUiModel>,
     anotherUsername: String,
     chatMessagesListState: LazyListState = rememberLazyListState(),
 ) {
+
     val roundedCornerDpValues = remember {
         CornerRoundnessDpValues().getSimpleRoundedCornerValues()
     }
 
     Column(modifier = modifier) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.85f),
-            state = chatMessagesListState,
-        ) {
-            items(count = textMessages.itemCount) { index ->
-                textMessages[index]?.let { chatModel ->
-                    ChatMessageCard(
-                        chatModel = chatModel,
-                        modifier = Modifier
-                            .padding(top = PaddingValues.MEDIUM)
-                            .fillMaxWidth()
-                            .wrapContentHeight(),
-                        senderBackgroundColor = MaterialTheme.colors.primary,
-                        receiverBackgroundColor = DarkMessageCardBackgroundSender,
-                        username = username,
-                    )
-                }
-            }
-
-            if (textMessages.loadState.append == LoadState.Loading) {
-                item {
-                    LoadingComposable(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .align(Alignment.CenterHorizontally)
-                    )
-                }
-            }
-        }
-
         Spacer(modifier = Modifier.height(PaddingValues.MEDIUM))
 
         Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = PaddingValues.MEDIUM),
+                .fillMaxWidth()
+                .height(100.dp)
+                .padding(horizontal = PaddingValues.MEDIUM)
+                .rotate(180f),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
@@ -192,6 +168,52 @@ fun ChatScreenContent(
                 Icon(imageVector = Icons.Filled.Send, contentDescription = "Send Message")
             }
         }
+
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize(),
+
+        ) {
+            items(count = textMessages.itemCount) { index ->
+                textMessages[index]?.let { chatScreenUiModel ->
+                    when(chatScreenUiModel) {
+                        is ChatScreenUiModel.ChatModel -> {
+                            ChatMessageCard(
+                                chatModel = chatScreenUiModel,
+                                modifier = Modifier
+                                    .padding(top = PaddingValues.MEDIUM)
+                                    .fillMaxWidth()
+                                    .wrapContentHeight()
+                                    .rotate(180f),
+                                senderBackgroundColor = MaterialTheme.colors.primary,
+                                receiverBackgroundColor = DarkMessageCardBackgroundSender,
+                                username = username,
+                            )
+                        }
+                        is ChatScreenUiModel.UnreadMessagesModel -> {
+                            Text(text = chatScreenUiModel.data)
+                        }
+
+                        else -> {
+
+                        }
+                    }
+
+                }
+            }
+
+            if (textMessages.loadState.append == LoadState.Loading) {
+                item {
+                    LoadingComposable(
+                        modifier = Modifier
+                            .size(32.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                }
+            }
+        }
+
+
     }
 }
 

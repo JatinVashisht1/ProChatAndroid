@@ -41,7 +41,7 @@ class AccountsScreenViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            observeAllUsersUseCase(shouldLoadFromNetwork = true)
+            observeAllUsersUseCase(shouldLoadFromNetwork = false)
         }
     }
 

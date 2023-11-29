@@ -4,33 +4,39 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.map
 import com.example.demochatapplication.core.Constants
 import com.example.demochatapplication.core.Mapper
-import com.example.demochatapplication.features.chat.domain.model.ChatModel
+import com.example.demochatapplication.features.chat.domain.model.ChatScreenUiModel
 import com.example.demochatapplication.features.chat.domain.model.MessageDeliveryState
 import com.example.demochatapplication.features.chat.domain.repository.ChatRepository
 import com.example.demochatapplication.features.chat.ui.uistate.ChatScreenState
 import com.example.demochatapplication.features.chat.ui.uistate.SendMessageTextFieldState
+import com.example.demochatapplication.features.chat.ui.utils.ChatViewModelUtils.createChatEventMessage
+import com.example.demochatapplication.features.chat.ui.utils.ChatViewModelUtils.createChatModel
 import com.example.demochatapplication.features.shared.navigation.NavArgsKeys
-import com.example.demochatapplication.features.shared.socket.ChatEventMessage
+import com.example.demochatapplication.features.chat.domain.model.ChatEventMessage
 import com.example.demochatapplication.features.shared.socket.SocketEvents
 import com.example.demochatapplication.features.shared.socket.SocketManager
+import com.example.demochatapplication.features.chat.domain.model.UpdateAllMessageDeliveryStatusBetween2UsersModel
+import com.example.demochatapplication.features.chat.domain.model.UpdateMessageDeliveryStateModel
 import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.socket.emitter.Emitter
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import timber.log.Timber
-import java.time.Instant
 import java.util.UUID
 import javax.inject.Inject
 
@@ -55,12 +61,14 @@ class ChatScreenViewModel @Inject constructor(
         MutableStateFlow<SendMessageTextFieldState>(SendMessageTextFieldState())
     val sendMessageTextFieldState: StateFlow<SendMessageTextFieldState> get() = _sendMessageTextFieldState
 
-    private lateinit var _textMessagesListState: Flow<PagingData<ChatModel>>
+    private lateinit var _textMessagesListState: Flow<PagingData<ChatScreenUiModel>>
     val textMessageListState get() = _textMessagesListState
 
-    private val onChat = Emitter.Listener {
+    private val onChat = Emitter.Listener { chatEventData ->
         viewModelScope.launch {
-            val data = it[0].toString()
+            val data = chatEventData[0].toString()
+//            Timber.tag(TAG).d("message is $data")
+
             val (from, to, message, createdAt, deliveryStatus, messageId) = Json.decodeFromString<ChatEventMessage>(
                 data
             )
@@ -69,11 +77,11 @@ class ChatScreenViewModel @Inject constructor(
 
             if (shouldStoreInDatabase) {
                 val deliveryState = deliveryStateAndStringMapper.mapBtoA(deliveryStatus)
-                val chatModel = ChatModel(
+                val chatModel = ChatScreenUiModel.ChatModel(
                     from = from,
                     to = to,
                     message = message,
-                    time = createdAt,
+                    timeInMillis = createdAt,
                     id = messageId,
                     deliveryState = deliveryState,
                 )
@@ -84,24 +92,76 @@ class ChatScreenViewModel @Inject constructor(
                     (to == _userSettingsStateFlow.value.username && from == _anotherUsernameState.value)
 
                 chatRepository.insertChatMessage(chatMessage = chatModel)
+                if (messageFromAnotherUser) {
+                    val updateMessageDeliveryStateModel = UpdateMessageDeliveryStateModel(
+                        from = _anotherUsernameState.value,
+                        to = _userSettingsStateFlow.value.username,
+                        messageId = messageId
+                        , updatedStatus = MessageDeliveryState.Read.rawString,
+                    )
+
+                    val updateMessageDeliveryStateString = Json.encodeToString(updateMessageDeliveryStateModel)
+                    SocketManager.mSocket?.emit(SocketEvents.UpdateMessageDeliveryStatus.eventName, updateMessageDeliveryStateString)
+                }
             }
         }
+    }
 
+    private val onUpdateMessageDeliveryState = Emitter.Listener { updateMessageDeliveryState ->
+        val updatedMessageStateString = updateMessageDeliveryState[0].toString()
+
+
+        val (from, to, messageId, updatedStatus) = Json.decodeFromString<UpdateMessageDeliveryStateModel>(
+            updatedMessageStateString
+        )
+        val messageDeliveryState = deliveryStateAndStringMapper.mapBtoA(updatedStatus)
+
+        viewModelScope.launch {
+            chatRepository.updateChatMessageDeliveryStatus(
+                messageId = messageId,
+                messageDeliveryState = messageDeliveryState
+            )
+        }
+    }
+
+    private val onUpdateAllMessageDeliveryState = Emitter.Listener {data ->
+        viewModelScope.launch {
+            val dataString = data[0].toString()
+            val updateAllMessageDeliveryState = Json.decodeFromString<UpdateAllMessageDeliveryStatusBetween2UsersModel>(dataString)
+            chatRepository.updateChatMessageDeliveryStatusOfAllMessagesBetween2Users(updateAllMessageDeliveryStatusBetween2UsersModel = updateAllMessageDeliveryState)
+        }
     }
 
     init {
         viewModelScope.launch {
             launch { fetchUserCredentials() }
+
             job?.cancel()
             job = launch {
                 setAnotherUsernameStateValue()
             }
+
             job?.join()
+
             launch {
                 loadChatMessages()
             }
 
-            SocketManager.mSocket?.on("chat", onChat)
+            launch {
+                SocketManager.mSocket?.on(SocketEvents.Chat.eventName, onChat)
+                SocketManager.mSocket?.on(
+                    SocketEvents.UpdateAllMessagesDeliveryStatusBetween2Users.eventName,
+                    onUpdateAllMessageDeliveryState
+                )
+                SocketManager.mSocket?.on(
+                    SocketEvents.UpdateMessageDeliveryStatus.eventName,
+                    onUpdateMessageDeliveryState
+                )
+            }
+
+            launch {
+                updateMessageDeliveryStatus()
+            }
         }
     }
 
@@ -142,55 +202,51 @@ class ChatScreenViewModel @Inject constructor(
         val from = _userSettingsStateFlow.value.username
         val to = _anotherUsernameState.value
         val message = _sendMessageTextFieldState.value.message
-        val createdAt = Instant.now().epochSecond
+        val createdAt = System.currentTimeMillis()
         val deliveryState = MessageDeliveryState.Sent
         val messageId = UUID.randomUUID().toString()
 
         viewModelScope.launch {
+            val chatEventMessage =
+                createChatEventMessage(from, to, message, createdAt, deliveryState, messageId)
+            val chatModel = createChatModel(from, to, message, createdAt, deliveryState, messageId)
 
-            coroutineScope {
-                val chatEventMessage = ChatEventMessage(
-                    from = from,
-                    to = to,
-                    message = message,
-                    createdAt = createdAt,
-                    deliveryStatus = deliveryState.rawString,
-                    messageId = messageId,
-                )
-
-                val chatModel = ChatModel(
-                    from = from,
-                    to = to,
-                    message = message,
-                    time = createdAt,
-                    id = messageId,
-                    deliveryState = deliveryState,
-                )
-
-
-                launch {
-                    chatRepository.insertChatMessage(chatMessage = chatModel)
-                }
-
-                launch {
-                    val chatEventMessageJson = Json.encodeToString(chatEventMessage)
-
-                    if (SocketManager.mSocket == null) {
-                        SocketManager.setSocket(
-                            Constants.SERVER_URL, _userSettingsStateFlow.value.token
-                        )
-                        SocketManager.establishConnection()
-                    }
-
-
-                    SocketManager.mSocket?.emit(
-                        SocketEvents.Chat.eventName, chatEventMessageJson
-                    )
-                }
-            }
+//            insertChatMessage(chatModel)
+            sendChatEventMessage(chatEventMessage)
         }
+    }
 
+    private fun insertChatMessage(chatModel: ChatScreenUiModel.ChatModel) {
+        viewModelScope.launch {
+            chatRepository.insertChatMessage(chatMessage = chatModel)
+        }
+    }
 
+    private fun sendChatEventMessage(chatEventMessage: ChatEventMessage) {
+        viewModelScope.launch {
+            val chatEventMessageJson = Json.encodeToString(chatEventMessage)
+
+            if (SocketManager.mSocket == null) {
+                SocketManager.setSocket(Constants.SERVER_URL, _userSettingsStateFlow.value.token)
+                SocketManager.establishConnection()
+            }
+
+            SocketManager.mSocket?.emit(SocketEvents.Chat.eventName, chatEventMessageJson)
+        }
+    }
+
+    private suspend fun updateMessageDeliveryStatus() {
+        withContext(IO) {
+            val username = _userSettingsStateFlow.value.username
+            val anotherUsername = _anotherUsernameState.value
+            val updateAllMessagesModel = UpdateAllMessageDeliveryStatusBetween2UsersModel(
+                from = anotherUsername,
+                to = username,
+                deliveryStatus = MessageDeliveryState.Read.rawString,
+            )
+            val updateAllMessageModelJson = Json.encodeToString(updateAllMessagesModel)
+            SocketManager.mSocket?.emit(SocketEvents.UpdateAllMessagesDeliveryStatusBetween2Users.eventName, updateAllMessageModelJson)
+        }
     }
 
     override fun onCleared() {

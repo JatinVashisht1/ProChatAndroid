@@ -6,7 +6,7 @@ import com.example.demochatapplication.core.Resource
 import com.example.demochatapplication.core.remote.ChatApi
 import com.example.demochatapplication.core.remote.dto.SearchUserBodyDto
 import com.example.demochatapplication.core.remote.util.getResponseBody
-import com.example.demochatapplication.features.accounts.data.database.SearchUserDatabase
+import com.example.demochatapplication.features.accounts.data.database.AccountsDatabase
 import com.example.demochatapplication.features.accounts.data.database.dao.AccountUserDao
 import com.example.demochatapplication.features.accounts.data.database.entities.AccountsUserEntity
 import com.example.demochatapplication.features.accounts.domain.model.UserModel
@@ -28,14 +28,14 @@ import javax.inject.Inject
  */
 
 class AccountsScreenRepositoryImpl @Inject constructor(
-    private val searchUserDatabase: SearchUserDatabase,
+    private val accountsDatabase: AccountsDatabase,
     private val accountsUserEntityAndModelMapper: Mapper<AccountsUserEntity, UserModel>,
     private val chatApi: ChatApi,
     private val userSettingsRepository: UserSettingsRepository,
 ) :
     AccountsUserRepository {
 
-    private var accountUserDao: AccountUserDao = searchUserDatabase.accountUserDao
+    private var accountUserDao: AccountUserDao = accountsDatabase.accountUserDao
 
     private var getListFrom = 0
 
