@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -47,10 +46,9 @@ import com.example.demochatapplication.features.chat.ui.uistate.ChatScreenState
 import com.example.demochatapplication.features.chat.ui.uistate.SendMessageTextFieldState
 import com.example.demochatapplication.features.chat.ui.utils.CornerRoundnessDpValues
 import com.example.demochatapplication.features.login.ui.utils.PaddingValues
-import com.example.demochatapplication.features.shared.composable.ErrorComposable
-import com.example.demochatapplication.features.shared.composable.LoadingComposable
+import com.example.demochatapplication.features.shared.composables.ErrorComposable
+import com.example.demochatapplication.features.shared.composables.LoadingComposable
 import com.example.demochatapplication.ui.theme.DarkMessageCardBackgroundSender
-import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
 @Composable

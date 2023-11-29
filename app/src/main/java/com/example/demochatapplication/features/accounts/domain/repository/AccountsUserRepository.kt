@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 interface AccountsUserRepository {
     suspend fun getAllUsers(shouldLoadFromNetwork: Boolean): Flow<List<UserModel>>
 
-    suspend fun searchUser(username: String,): List<UserModel>
+//    suspend fun searchUser(username: String,): List<UserModel>
 
     suspend fun deleteUser(username: String)
 

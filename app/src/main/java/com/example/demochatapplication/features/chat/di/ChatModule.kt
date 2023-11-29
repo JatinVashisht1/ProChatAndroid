@@ -8,6 +8,7 @@ import com.example.demochatapplication.core.remote.dto.GetChatMessagesBetween2Us
 import com.example.demochatapplication.features.chat.data.database.ChatDatabase
 import com.example.demochatapplication.features.chat.data.database.entity.ChatDbEntity
 import com.example.demochatapplication.features.chat.data.mapper.ChatDbEntityAndModelMapper
+import com.example.demochatapplication.features.chat.data.mapper.ChatMessageDtoAndDbEntityMapper
 import com.example.demochatapplication.features.chat.data.mapper.MessageDeliveryStateAndStringMapper
 import com.example.demochatapplication.features.chat.data.repository.ChatRepositoryImpl
 import com.example.demochatapplication.features.chat.domain.model.ChatScreenUiModel
@@ -26,9 +27,7 @@ object ChatsModule {
     @Provides
     @Singleton
     fun providesChatDatabase(app: Application): ChatDatabase =
-        Room
-            .databaseBuilder(app, ChatDatabase::class.java, ChatDatabase.CHAT_DB_NAME)
-            .build()
+        Room.databaseBuilder(app, ChatDatabase::class.java, ChatDatabase.CHAT_DB_NAME).build()
 
     @Provides
     @Singleton
@@ -39,6 +38,13 @@ object ChatsModule {
     @Singleton
     fun providesMessageDeliveryStateAndStringMapper(): Mapper<MessageDeliveryState, String> =
         MessageDeliveryStateAndStringMapper()
+
+    @Provides
+    @Singleton
+    fun providesChatMessageDtoAndChatDbListMapper(
+        messageDeliveryStateAndStringMapper: Mapper<MessageDeliveryState, String>
+    ): Mapper<GetChatMessagesBetween2UsersDto, List<ChatDbEntity>> =
+        ChatMessageDtoAndDbEntityMapper(messageDeliveryStateAndStringMapper = messageDeliveryStateAndStringMapper)
 
     @Provides
     @Singleton

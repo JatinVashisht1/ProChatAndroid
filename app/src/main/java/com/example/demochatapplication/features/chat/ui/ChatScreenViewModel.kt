@@ -14,7 +14,7 @@ import com.example.demochatapplication.features.chat.ui.uistate.ChatScreenState
 import com.example.demochatapplication.features.chat.ui.uistate.SendMessageTextFieldState
 import com.example.demochatapplication.features.chat.ui.utils.ChatViewModelUtils.createChatEventMessage
 import com.example.demochatapplication.features.chat.ui.utils.ChatViewModelUtils.createChatModel
-import com.example.demochatapplication.features.shared.navigation.NavArgsKeys
+import com.example.demochatapplication.core.navigation.NavArgsKeys
 import com.example.demochatapplication.features.chat.domain.model.ChatEventMessage
 import com.example.demochatapplication.features.shared.socket.SocketEvents
 import com.example.demochatapplication.features.shared.socket.SocketManager

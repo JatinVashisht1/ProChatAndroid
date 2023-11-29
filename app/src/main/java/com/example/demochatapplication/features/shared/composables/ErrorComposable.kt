@@ -1,7 +1,6 @@
-package com.example.demochatapplication.features.shared.composable
+package com.example.demochatapplication.features.shared.composables
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable

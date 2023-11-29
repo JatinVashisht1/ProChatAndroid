@@ -112,11 +112,11 @@ class AccountsScreenRepositoryImpl @Inject constructor(
     }
 
     @Throws(IOException::class, SocketTimeoutException::class)
-    suspend fun searchUserFromServer(username: String): List<UserModel> {
+    suspend fun searchUserFromServer(username: String, searchQuery: String,): List<UserModel> {
         val searchUserBodyDto = SearchUserBodyDto(username = username)
         val searchUserResponse = chatApi.searchUser(
-            searchUserBodyDto = searchUserBodyDto,
-            authorizationHeader = authorizationHeader
+            authorizationHeader = authorizationHeader,
+            searchUser = searchQuery
         )
         val isRequestSuccessful = searchUserResponse.isSuccessful
 
@@ -136,21 +136,6 @@ class AccountsScreenRepositoryImpl @Inject constructor(
         } else {
             throw SocketTimeoutException(SOCKET_TIMEOUT_EXCEPTION_MESSAGE)
         }
-    }
-
-    override suspend fun searchUser(username: String): List<UserModel> {
-        try {
-            val usersFromServer = searchUserFromServer(username = username)
-                .map {
-                    accountsUserEntityAndModelMapper.mapBtoA(it)
-                }.toTypedArray()
-
-            accountUserDao.insertUsers(*usersFromServer)
-        } catch (e: Exception) {
-            Timber.tag(TAG).d(e.toString())
-        }
-
-        return searchUserFromDatabase(username = username)
     }
 
 

@@ -5,5 +5,5 @@ import com.example.demochatapplication.features.searchuseraccounts.domain.model.
 import kotlinx.coroutines.flow.Flow
 
 interface SearchUserRepository {
-    suspend fun searchUser(username: String): Flow<PagingData<SearchUserDomainModel>>
+    suspend fun searchUser(queryString: String): Flow<PagingData<SearchUserDomainModel>>
 }

@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @OptIn(ExperimentalPagingApi::class)
@@ -36,28 +37,30 @@ class SearchUserRepoImpl @Inject constructor(
             authorizationHeader = userCredentials.token
         }
     }
-    override suspend fun searchUser(username: String): Flow<PagingData<SearchUserDomainModel>> {
-        val pagingDataFlow = Pager(
-            config = PagingConfig(
-                pageSize = 50,
-                prefetchDistance = 15,
-            ),
-            remoteMediator = SearchUserRemoteMediator(
-                chatApi = chatApi,
-                searchUserDatabase = searchUserDatabase,
-                username = username,
-                token = authorizationHeader,
-            )
-        ) {
-            searchUserDatabase.searchUserDao.searchAccountByUsername(username = username)
-        }
-            .flow
-            .map { pagingData->
-                pagingData.map { searchUserDatabaseEntity->
-                    searchUserDbEntityAndModelMapper.mapAtoB(searchUserDatabaseEntity)
-                }
+    override suspend fun searchUser(queryString: String): Flow<PagingData<SearchUserDomainModel>> {
+        return withContext(IO) {
+            val pagingDataFlow = Pager(
+                config = PagingConfig(
+                    pageSize = 50,
+                    prefetchDistance = 15,
+                ),
+                remoteMediator = SearchUserRemoteMediator(
+                    chatApi = chatApi,
+                    searchUserDatabase = searchUserDatabase,
+                    token = authorizationHeader,
+                    queryString = queryString
+                )
+            ) {
+                searchUserDatabase.searchUserDao.searchAccountByUsername(username = queryString)
             }
+                .flow
+                .map { pagingData ->
+                    pagingData.map { searchUserDatabaseEntity ->
+                        searchUserDbEntityAndModelMapper.mapAtoB(searchUserDatabaseEntity)
+                    }
+                }
 
-        return pagingDataFlow
+            pagingDataFlow
+        }
     }
 }

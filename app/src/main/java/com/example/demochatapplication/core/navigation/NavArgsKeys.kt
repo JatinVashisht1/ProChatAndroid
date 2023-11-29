@@ -1,4 +1,4 @@
-package com.example.demochatapplication.features.shared.navigation
+package com.example.demochatapplication.core.navigation
 
 /**
  * Created by Jatin Vashisht on 04-11-2023.

@@ -9,6 +9,7 @@ import com.example.demochatapplication.core.remote.ChatApi
 import com.example.demochatapplication.core.remote.dto.SearchUserBodyDto
 import com.example.demochatapplication.features.searchuseraccounts.data.database.SearchUserDatabase
 import com.example.demochatapplication.features.searchuseraccounts.data.database.entity.SearchUserDatabaseEntity
+import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
 import javax.net.ssl.SSLException
@@ -17,8 +18,8 @@ import javax.net.ssl.SSLException
 class SearchUserRemoteMediator @Inject constructor(
     private val chatApi: ChatApi,
     private val searchUserDatabase: SearchUserDatabase,
-    private val username: String,
     private val token: String,
+    private val queryString: String,
 ) : RemoteMediator<Int, SearchUserDatabaseEntity>() {
     private val searchUserDao = searchUserDatabase.searchUserDao
     override suspend fun load(
@@ -26,7 +27,7 @@ class SearchUserRemoteMediator @Inject constructor(
         state: PagingState<Int, SearchUserDatabaseEntity>
     ): MediatorResult {
         try {
-            val searchUserResponse = chatApi.searchUser(searchUserBodyDto = SearchUserBodyDto(username = username), authorizationHeader = token)
+            val searchUserResponse = chatApi.searchUser(authorizationHeader = token, searchUser = queryString,)
             if (!searchUserResponse.isSuccessful) {
                 throw retrofit2.HttpException(searchUserResponse)
             }
@@ -38,6 +39,9 @@ class SearchUserRemoteMediator @Inject constructor(
                 val searchUsernameDbEntityList = usernameList.map {username ->
                     SearchUserDatabaseEntity(username = username)
                 }
+
+                Timber.tag(TAG).d("searchuserbody: ${it.users}")
+
 
                 searchUserDao.insertSearchUserEntity(searchUsernameDbEntityList)
             }
@@ -51,7 +55,20 @@ class SearchUserRemoteMediator @Inject constructor(
         } catch (e: SSLException) {
             return MediatorResult.Success(endOfPaginationReached = true)
         } catch (e: Exception) {
+            Timber.tag(TAG).d("exception while searching user: $e")
             return MediatorResult.Error(e)
         }
+    }
+
+    override suspend fun initialize(): InitializeAction {
+        return if (queryString.isBlank()) {
+            InitializeAction.SKIP_INITIAL_REFRESH
+        } else {
+            InitializeAction.LAUNCH_INITIAL_REFRESH
+        }
+    }
+
+    companion object {
+        const val TAG = "searchuserremotemediator"
     }
 }

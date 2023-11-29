@@ -12,8 +12,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.demochatapplication.core.Resource
 import com.example.demochatapplication.features.accounts.ui.components.AccountsScreenComposable
-import com.example.demochatapplication.features.shared.composable.ErrorComposable
-import com.example.demochatapplication.features.shared.composable.LoadingComposable
+import com.example.demochatapplication.features.shared.composables.ErrorComposable
+import com.example.demochatapplication.features.shared.composables.LoadingComposable
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 
@@ -57,7 +57,8 @@ fun AccountsScreenParent(
                     accounts = userState.result ?: emptyList(),
                     modifier = Modifier
                         .fillMaxSize(),
-                    lazyColumnState = lazyListState
+                    lazyColumnState = lazyListState,
+                    navHostController = navHostController
                 ) { username ->
                     accountsScreenViewModel.onChatAccountItemClicked(username)
                 }

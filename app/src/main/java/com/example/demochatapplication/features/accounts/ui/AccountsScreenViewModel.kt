@@ -11,7 +11,7 @@ import com.example.demochatapplication.features.accounts.domain.model.UserModel
 import com.example.demochatapplication.features.accounts.domain.usecase.ObserveAllUsersUseCase
 import com.example.demochatapplication.features.accounts.ui.components.AccountsScreenState
 import com.example.demochatapplication.features.accounts.ui.components.SearchUsersComponentState
-import com.example.demochatapplication.features.shared.navigation.Destinations
+import com.example.demochatapplication.core.navigation.Destinations
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

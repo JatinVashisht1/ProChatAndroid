@@ -26,7 +26,7 @@ fun AccountItemComposable(
             .fillMaxSize()
             .padding(PaddingValues.MEDIUM),
         ) {
-            Text(text = userModel.username, modifier = Modifier.align(Alignment.CenterVertically))
+            Text(text = userModel.username, modifier = Modifier.align(Alignment.CenterVertically), )
         }
     }
 }

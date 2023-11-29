@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.demochatapplication.features.destinationswitcher.uistate.DestinationSwitcherScreenState
-import com.example.demochatapplication.features.shared.navigation.Destinations
+import com.example.demochatapplication.core.navigation.Destinations
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers.IO

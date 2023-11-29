@@ -10,13 +10,13 @@ import com.example.demochatapplication.features.searchuseraccounts.data.database
 @Dao
 interface SearchUserDao {
 
-    @Insert(entity = SearchUserDatabaseEntity::class, onConflict = OnConflictStrategy.REPLACE)
+    @Insert(entity = SearchUserDatabaseEntity::class, onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertSearchUserEntity(searchUserDatabaseEntity: SearchUserDatabaseEntity)
 
-    @Insert(entity = SearchUserDatabaseEntity::class, onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSearchUserEntity(searchUserDatabaseEntityList: List<SearchUserDatabaseEntity>)
+    @Insert(entity = SearchUserDatabaseEntity::class, onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertSearchUserEntity(searchUserDatabaseEntity: List<SearchUserDatabaseEntity>)
 
-    @Query("SELECT * FROM searchuserentity WHERE `username` = :username")
+    @Query("SELECT * FROM searchuserentity WHERE `username` LIKE '%' || :username || '%'")
     fun searchAccountByUsername(username: String): PagingSource<Int, SearchUserDatabaseEntity>
 
 }

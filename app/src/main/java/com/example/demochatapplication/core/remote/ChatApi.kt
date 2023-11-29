@@ -22,25 +22,27 @@ interface ChatApi {
     @POST("/user/signin")
     suspend fun signInUser(@Body signInBodyDto: SignInBodyDto): Response<SignInResponseDto>
 
-    @GET("/user/searchUser")
+    @GET("/user/searchUser/{$SEARCH_USERNAME}")
     suspend fun searchUser(
-        @Body searchUserBodyDto: SearchUserBodyDto,
-        @Header(Constants.AUTHORIZATION_HEADER) authorizationHeader: String
+        @Path(SEARCH_USERNAME) searchUser: String,
+        @Header(AUTHORIZATION_HEADER) authorizationHeader: String
     ): Response<SearchUserResponseDto>
 
     @GET("/chat/getuseraccounts")
     suspend fun getChatAccounts(
-        @Header(Constants.AUTHORIZATION_HEADER) authorizationHeader: String,
+        @Header(AUTHORIZATION_HEADER) authorizationHeader: String,
     ): Response<GetChatAccountsDto>
 
     @GET("/chat/getuserschat/{$ANOTHER_USERNAME_URL_PARAM}")
     @Headers("Content-Type: application/json")
     suspend fun getChatMessagesBetween2Users(
-        @Header(Constants.AUTHORIZATION_HEADER) authorizationHeader: String,
+        @Header(AUTHORIZATION_HEADER) authorizationHeader: String,
         @Path(ANOTHER_USERNAME_URL_PARAM) anotherUsername: String,
     ): Response<GetChatMessagesBetween2UsersDto>
 
     companion object {
         const val ANOTHER_USERNAME_URL_PARAM = "anotherUsername"
+        const val SEARCH_USERNAME = "queryUser"
+        const val AUTHORIZATION_HEADER = "Authorization"
     }
 }

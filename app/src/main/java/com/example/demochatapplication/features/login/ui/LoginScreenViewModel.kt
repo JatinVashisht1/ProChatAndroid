@@ -10,7 +10,7 @@ import com.example.demochatapplication.features.login.domain.model.SignInBodyEnt
 import com.example.demochatapplication.features.login.domain.repository.IAuthenticationRepository
 import com.example.demochatapplication.features.login.ui.uistate.LoginScreenState
 import com.example.demochatapplication.features.login.ui.uistate.PasswordTextFieldProperties
-import com.example.demochatapplication.features.shared.navigation.Destinations
+import com.example.demochatapplication.core.navigation.Destinations
 import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -21,8 +21,10 @@ import com.example.demochatapplication.features.destinationswitcher.ui.Destinati
 import com.example.demochatapplication.features.login.ui.LoginScreenParent
 import com.example.demochatapplication.features.shared.socket.SocketManager
 import com.example.demochatapplication.features.shared.chatsyncservice.ChatSyncService
-import com.example.demochatapplication.features.shared.navigation.Destinations
-import com.example.demochatapplication.features.shared.navigation.NavArgsKeys
+import com.example.demochatapplication.core.navigation.Destinations
+import com.example.demochatapplication.core.navigation.NavArgsKeys
+import com.example.demochatapplication.features.searchuseraccounts.ui.SearchUserScreen
+import com.example.demochatapplication.features.searchuseraccounts.ui.SearchUserScreenParent
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import com.example.demochatapplication.ui.theme.DemoChatApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -83,6 +85,10 @@ class MainActivity : ComponentActivity() {
                             AccountsScreenParent(
                                 navHostController = navController
                             )
+                        }
+
+                        composable(Destinations.SearchUserScreen.route) {
+                            SearchUserScreenParent(navHostController = navController)
                         }
                     }
                 }
