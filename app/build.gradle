@@ -18,6 +18,7 @@ android {
         versionCode 1
         versionName "1.0"
 
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true
@@ -111,10 +112,11 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     implementation("androidx.room:room-paging:2.6.0")
-
-    // To use Kotlin annotation processing tool (kapt)
-//    ksp "androidx.room:room-compiler:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
+    // paging
+    def paging_version = "3.2.1"
+    implementation("androidx.paging:paging-runtime-ktx:$paging_version")
+    implementation("androidx.paging:paging-compose:$paging_version")
 
     // Timber (for logging)
     implementation 'com.jakewharton.timber:timber:5.0.1'
@@ -131,9 +133,6 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation "com.squareup.retrofit2:converter-gson:2.7.2"
 
-    // google play services for smart lock
-//    implementation 'com.google.android.gms:play-services-auth:20.7.0'
-
     // datastore preferences
     implementation "androidx.datastore:datastore-preferences:1.0.0"
 
@@ -146,10 +145,7 @@ dependencies {
     // coroutines support for room
     implementation("androidx.room:room-ktx:2.6.0")
 
-    // paging
-    def paging_version = "3.2.1"
-    implementation("androidx.paging:paging-runtime:$paging_version")
-    implementation("androidx.paging:paging-compose:$paging_version")
+
 
 }
 

@@ -13,7 +13,10 @@ interface SearchUserDao {
     @Insert(entity = SearchUserDatabaseEntity::class, onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSearchUserEntity(searchUserDatabaseEntity: SearchUserDatabaseEntity)
 
-    @Query("SELECT * FROM searchuserentity WHERE `username` LIKE '%' || :username || '%'" )
-    suspend fun searchAccountByUsername(username: String): PagingSource<Int, SearchUserDatabaseEntity>
+    @Insert(entity = SearchUserDatabaseEntity::class, onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSearchUserEntity(searchUserDatabaseEntityList: List<SearchUserDatabaseEntity>)
+
+    @Query("SELECT * FROM searchuserentity WHERE `username` = :username")
+    fun searchAccountByUsername(username: String): PagingSource<Int, SearchUserDatabaseEntity>
 
 }
