@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.dp
 import com.example.demochatapplication.features.chat.domain.model.ChatScreenUiModel
 import com.example.demochatapplication.features.chat.ui.utils.CornerRoundnessDpValues
 import com.example.demochatapplication.features.login.ui.utils.PaddingValues
-import com.example.demochatapplication.ui.theme.DarkMessageCardBackgroundSender
-import com.example.demochatapplication.ui.theme.Typography
+import com.example.demochatapplication.theme.DarkMessageCardBackgroundSender
+import com.example.demochatapplication.theme.Typography
 import java.time.Instant
 import kotlin.math.absoluteValue
 

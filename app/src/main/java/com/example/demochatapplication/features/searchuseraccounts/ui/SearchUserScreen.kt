@@ -18,6 +18,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextFieldColors
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.IconButton
@@ -43,6 +46,7 @@ import com.example.demochatapplication.features.searchuseraccounts.domain.model.
 import com.example.demochatapplication.features.searchuseraccounts.ui.components.TextFieldState
 import com.example.demochatapplication.features.shared.composables.ErrorComposable
 import com.example.demochatapplication.features.shared.composables.LoadingComposable
+import com.example.demochatapplication.theme.DarkPlaceholderTextColor
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -68,23 +72,36 @@ fun SearchUserScreenParent(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            TextField(
+        Row(
+            modifier = Modifier
+                .padding(PaddingValues.MEDIUM)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .weight(2f),
                 value = searchTextFieldState.value.text,
                 onValueChange = searchUserViewModel::onTextFieldValueChange,
                 label = {
                     Text(
-                        text = searchTextFieldState.value.text
+                        text = searchTextFieldState.value.label,
+                        color = MaterialTheme.colors.onBackground
                     )
                 },
                 placeholder = {
-                    Text(text = searchTextFieldState.value.placeholder)
-                })
+                    Text(text = searchTextFieldState.value.placeholder, color = DarkPlaceholderTextColor,)
+                },
+            )
 
-            Spacer(modifier = Modifier.width(PaddingValues.MEDIUM))
+            Spacer(modifier = Modifier.weight(0.2f))
 
-            IconButton(onClick = searchUserViewModel::searchUsername) {
+            IconButton(
+                modifier = Modifier.weight(0.5f),
+                onClick = searchUserViewModel::searchUsername
+            ) {
                 Icon(
+                    modifier = Modifier.fillMaxSize(),
                     imageVector = Icons.Default.Search,
                     contentDescription = "search user",
                     tint = MaterialTheme.colors.onBackground

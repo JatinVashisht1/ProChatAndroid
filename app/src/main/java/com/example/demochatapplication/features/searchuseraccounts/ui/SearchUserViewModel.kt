@@ -37,7 +37,7 @@ class SearchUserViewModel @Inject constructor(
     val searchUsernameFlow: StateFlow<PagingData<SearchUserDomainModel>> get() = _searchUsernameFlow.asStateFlow()
     private var searchUsernameJob: Job? = null
 
-    private val _searchUserTextFieldState = MutableStateFlow<TextFieldState>(TextFieldState())
+    private val _searchUserTextFieldState = MutableStateFlow<TextFieldState>(TextFieldState(label = "search user", placeholder = "type here"))
     val searchUserTextFieldState: StateFlow<TextFieldState> get() = _searchUserTextFieldState.asStateFlow()
 
     val uiEvents: Channel<SearchUserScreenEvents> = Channel()

@@ -1,6 +1,5 @@
 package com.example.demochatapplication
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,16 +19,13 @@ import com.example.demochatapplication.features.chat.ui.ChatScreen
 import com.example.demochatapplication.features.destinationswitcher.ui.DestinationSwitcherScreen
 import com.example.demochatapplication.features.login.ui.LoginScreenParent
 import com.example.demochatapplication.features.shared.socket.SocketManager
-import com.example.demochatapplication.features.shared.chatsyncservice.ChatSyncService
 import com.example.demochatapplication.core.navigation.Destinations
 import com.example.demochatapplication.core.navigation.NavArgsKeys
-import com.example.demochatapplication.features.searchuseraccounts.ui.SearchUserScreen
 import com.example.demochatapplication.features.searchuseraccounts.ui.SearchUserScreenParent
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
-import com.example.demochatapplication.ui.theme.DemoChatApplicationTheme
+import com.example.demochatapplication.theme.DemoChatApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint

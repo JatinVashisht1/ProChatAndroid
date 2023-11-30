@@ -48,7 +48,7 @@ import com.example.demochatapplication.features.chat.ui.utils.CornerRoundnessDpV
 import com.example.demochatapplication.features.login.ui.utils.PaddingValues
 import com.example.demochatapplication.features.shared.composables.ErrorComposable
 import com.example.demochatapplication.features.shared.composables.LoadingComposable
-import com.example.demochatapplication.ui.theme.DarkMessageCardBackgroundSender
+import com.example.demochatapplication.theme.DarkMessageCardBackgroundSender
 import timber.log.Timber
 
 @Composable
