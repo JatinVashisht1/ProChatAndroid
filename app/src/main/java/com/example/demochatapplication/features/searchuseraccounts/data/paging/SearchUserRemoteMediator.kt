@@ -1,14 +1,13 @@
 package com.example.demochatapplication.features.searchuseraccounts.data.paging
 
-import android.net.http.HttpException
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import com.example.demochatapplication.core.remote.ChatApi
-import com.example.demochatapplication.core.remote.dto.SearchUserBodyDto
 import com.example.demochatapplication.features.searchuseraccounts.data.database.SearchUserDatabase
 import com.example.demochatapplication.features.searchuseraccounts.data.database.entity.SearchUserDatabaseEntity
+import com.example.demochatapplication.features.shared.internetconnectivity.NetworkConnectionManager
 import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
@@ -18,6 +17,7 @@ import javax.net.ssl.SSLException
 class SearchUserRemoteMediator @Inject constructor(
     private val chatApi: ChatApi,
     private val searchUserDatabase: SearchUserDatabase,
+    private val networkConnectionManager: NetworkConnectionManager,
     private val token: String,
     private val queryString: String,
 ) : RemoteMediator<Int, SearchUserDatabaseEntity>() {
@@ -27,7 +27,8 @@ class SearchUserRemoteMediator @Inject constructor(
         state: PagingState<Int, SearchUserDatabaseEntity>
     ): MediatorResult {
         try {
-            val searchUserResponse = chatApi.searchUser(authorizationHeader = token, searchUser = queryString,)
+            val searchUserResponse =
+                chatApi.searchUser(authorizationHeader = token, searchUser = queryString)
             if (!searchUserResponse.isSuccessful) {
                 throw retrofit2.HttpException(searchUserResponse)
             }
@@ -36,7 +37,7 @@ class SearchUserRemoteMediator @Inject constructor(
 
             searchUserBody?.let {
                 val usernameList = it.users
-                val searchUsernameDbEntityList = usernameList.map {username ->
+                val searchUsernameDbEntityList = usernameList.map { username ->
                     SearchUserDatabaseEntity(username = username)
                 }
 
@@ -61,7 +62,7 @@ class SearchUserRemoteMediator @Inject constructor(
     }
 
     override suspend fun initialize(): InitializeAction {
-        return if (queryString.isBlank()) {
+        return if (queryString.isBlank() || !networkConnectionManager.isInternetAvailable) {
             InitializeAction.SKIP_INITIAL_REFRESH
         } else {
             InitializeAction.LAUNCH_INITIAL_REFRESH

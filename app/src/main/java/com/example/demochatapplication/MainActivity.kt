@@ -22,6 +22,7 @@ import com.example.demochatapplication.features.shared.socket.SocketManager
 import com.example.demochatapplication.core.navigation.Destinations
 import com.example.demochatapplication.core.navigation.NavArgsKeys
 import com.example.demochatapplication.features.searchuseraccounts.ui.SearchUserScreenParent
+import com.example.demochatapplication.features.shared.internetconnectivity.NetworkConnectionManager
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import com.example.demochatapplication.theme.DemoChatApplicationTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,20 +34,16 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var userSettingsRepository: UserSettingsRepository
+
+    @Inject
+    lateinit var networkConnectionManager: NetworkConnectionManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch {
             SocketManager.setSocket(url = Constants.SERVER_URL, userSettingsRepository.getFirstEntry().token)
             SocketManager.establishConnection()
-//            SocketManager.mSocket?.on("chat") {
-//                val data = it[0]
-//                Timber.tag(TAG).d("data returned is $data")
-//            }
         }
-//        startService(Intent(this, ChatSyncService::class.java))
-
-//        mSocket.on(Socket.EVENT_CONNECT, socketTester.onConnect);
 
         setContent {
             val navController = rememberNavController()
@@ -90,6 +87,16 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        networkConnectionManager.startMonitoring()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        networkConnectionManager.stopMonitoring()
     }
 
     companion object {

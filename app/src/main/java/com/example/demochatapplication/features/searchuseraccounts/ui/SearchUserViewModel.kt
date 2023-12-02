@@ -13,15 +13,11 @@ import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -61,7 +57,7 @@ class SearchUserViewModel @Inject constructor(
         }
     }
 
-    fun onTextFieldValueChange(newQuery: String) {
+    fun onSearchTextFieldValueChange(newQuery: String) {
         viewModelScope.launch {
             _searchUserTextFieldState.value = _searchUserTextFieldState.value.copy(text = newQuery)
         }

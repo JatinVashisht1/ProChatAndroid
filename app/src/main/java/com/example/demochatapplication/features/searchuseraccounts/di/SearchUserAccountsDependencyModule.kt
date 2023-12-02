@@ -10,6 +10,7 @@ import com.example.demochatapplication.features.searchuseraccounts.data.mapper.S
 import com.example.demochatapplication.features.searchuseraccounts.data.repository.SearchUserRepoImpl
 import com.example.demochatapplication.features.searchuseraccounts.domain.model.SearchUserDomainModel
 import com.example.demochatapplication.features.searchuseraccounts.domain.repository.SearchUserRepository
+import com.example.demochatapplication.features.shared.internetconnectivity.NetworkConnectionManager
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import dagger.Module
 import dagger.Provides
@@ -38,11 +39,13 @@ object SearchUserAccountsDependencyModule {
         searchUserDatabase: SearchUserDatabase,
         userSettingsRepository: UserSettingsRepository,
         chatApi: ChatApi,
-        searchUserDbEntityAndModelMapper: Mapper<SearchUserDatabaseEntity, SearchUserDomainModel>
+        searchUserDbEntityAndModelMapper: Mapper<SearchUserDatabaseEntity, SearchUserDomainModel>,
+        networkConnectionManager: NetworkConnectionManager,
     ): SearchUserRepository = SearchUserRepoImpl(
         searchUserDatabase = searchUserDatabase,
         userSettingsRepository = userSettingsRepository,
         chatApi = chatApi,
         searchUserDbEntityAndModelMapper = searchUserDbEntityAndModelMapper,
+        networkConnectionManager = networkConnectionManager,
     )
 }

@@ -12,6 +12,7 @@ import com.example.demochatapplication.features.searchuseraccounts.data.database
 import com.example.demochatapplication.features.searchuseraccounts.data.paging.SearchUserRemoteMediator
 import com.example.demochatapplication.features.searchuseraccounts.domain.model.SearchUserDomainModel
 import com.example.demochatapplication.features.searchuseraccounts.domain.repository.SearchUserRepository
+import com.example.demochatapplication.features.shared.internetconnectivity.NetworkConnectionManager
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -27,6 +28,7 @@ class SearchUserRepoImpl @Inject constructor(
     private val userSettingsRepository: UserSettingsRepository,
     private val chatApi: ChatApi,
     private val searchUserDbEntityAndModelMapper: Mapper<SearchUserDatabaseEntity, SearchUserDomainModel>,
+    private val networkConnectionManager: NetworkConnectionManager,
 ): SearchUserRepository {
     private lateinit var username: String
     private lateinit var authorizationHeader: String
@@ -48,7 +50,8 @@ class SearchUserRepoImpl @Inject constructor(
                     chatApi = chatApi,
                     searchUserDatabase = searchUserDatabase,
                     token = authorizationHeader,
-                    queryString = queryString
+                    queryString = queryString,
+                    networkConnectionManager = networkConnectionManager
                 )
             ) {
                 searchUserDatabase.searchUserDao.searchAccountByUsername(username = queryString)

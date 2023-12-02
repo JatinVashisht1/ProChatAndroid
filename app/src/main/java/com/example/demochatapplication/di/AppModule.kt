@@ -1,5 +1,9 @@
 package com.example.demochatapplication.di
 
+import android.app.Application
+import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
+import android.net.NetworkRequest
 import com.example.demochatapplication.core.Constants
 import com.example.demochatapplication.core.remote.ChatApi
 import dagger.Module
@@ -22,5 +26,4 @@ object AppModule {
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(ChatApi::class.java)
-
 }

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -19,18 +18,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.TextFieldColors
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,7 +43,6 @@ import com.example.demochatapplication.features.shared.composables.ErrorComposab
 import com.example.demochatapplication.features.shared.composables.LoadingComposable
 import com.example.demochatapplication.theme.DarkPlaceholderTextColor
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import timber.log.Timber
 
@@ -78,20 +72,12 @@ fun SearchUserScreenParent(
                 .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            OutlinedTextField(
+            SearchUserTextField(
+                searchTextFieldState = searchTextFieldState.value,
+                onSearchTextFieldValueChange = searchUserViewModel::onSearchTextFieldValueChange,
+                onSearchUserButtonClicked = searchUserViewModel::searchUsername,
                 modifier = Modifier
-                    .weight(2f),
-                value = searchTextFieldState.value.text,
-                onValueChange = searchUserViewModel::onTextFieldValueChange,
-                label = {
-                    Text(
-                        text = searchTextFieldState.value.label,
-                        color = MaterialTheme.colors.onBackground
-                    )
-                },
-                placeholder = {
-                    Text(text = searchTextFieldState.value.placeholder, color = DarkPlaceholderTextColor,)
-                },
+                    .weight(2f)
             )
 
             Spacer(modifier = Modifier.weight(0.2f))
@@ -129,9 +115,6 @@ fun SearchUserScreenParent(
                     usernamesPagingData = usernamePagingState,
                     modifier = Modifier.fillMaxSize(),
                     lazyListState = lazyListState,
-                    searchTextFieldState = searchTextFieldState.value,
-                    onSearchTextFieldValueChange = searchUserViewModel::onTextFieldValueChange,
-                    onSearchUserButtonClicked = searchUserViewModel::searchUsername,
                     onSearchUserItemClicked = searchUserViewModel::onUsernameItemClicked
                 )
             }
@@ -145,9 +128,6 @@ fun SearchUserScreen(
     modifier: Modifier = Modifier,
     lazyListState: LazyListState = rememberLazyListState(),
     usernamesPagingData: LazyPagingItems<SearchUserDomainModel>,
-    searchTextFieldState: TextFieldState,
-    onSearchTextFieldValueChange: (String) -> Unit,
-    onSearchUserButtonClicked: () -> Unit,
     onSearchUserItemClicked: (String) -> Unit,
 ) {
     LazyColumn(modifier = modifier, state = lazyListState) {
@@ -193,6 +173,29 @@ fun SearchUserItem(
             color = MaterialTheme.colors.onBackground,
         )
     }
+}
+
+@Composable
+fun SearchUserTextField(
+    modifier: Modifier = Modifier,
+    searchTextFieldState: TextFieldState,
+    onSearchTextFieldValueChange: (String) -> Unit,
+    onSearchUserButtonClicked: () -> Unit,
+) {
+    OutlinedTextField(
+        modifier = modifier,
+        value = searchTextFieldState.text,
+        onValueChange = onSearchTextFieldValueChange,
+        label = {
+            Text(
+                text = searchTextFieldState.label,
+                color = MaterialTheme.colors.onBackground
+            )
+        },
+        placeholder = {
+            Text(text = searchTextFieldState.placeholder, color = DarkPlaceholderTextColor,)
+        },
+    )
 }
 
 private const val TAG = "searchuserscreen"
