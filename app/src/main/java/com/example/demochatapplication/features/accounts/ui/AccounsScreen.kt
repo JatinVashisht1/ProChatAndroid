@@ -1,16 +1,20 @@
 package com.example.demochatapplication.features.accounts.ui
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.demochatapplication.core.Resource
+import androidx.paging.LoadState
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.demochatapplication.features.accounts.ui.components.AccountsScreenComposable
 import com.example.demochatapplication.features.shared.composables.ErrorComposable
 import com.example.demochatapplication.features.shared.composables.LoadingComposable
@@ -26,7 +30,10 @@ fun AccountsScreenParent(
     accountsScreenViewModel: AccountsScreenViewModel = hiltViewModel(),
     navHostController: NavHostController,
 ) {
-    val userState = accountsScreenViewModel.userAccountState.collectAsState().value
+    val accountsUserModelPagingData =
+        accountsScreenViewModel.accountsUserModelPagingDataFlow.collectAsLazyPagingItems()
+    val refreshState = accountsUserModelPagingData.loadState.refresh
+
     val lazyListState = rememberLazyListState()
 
     LaunchedEffect(key1 = Unit) {
@@ -39,28 +46,33 @@ fun AccountsScreenParent(
         }
     }
 
-    when (userState) {
-        is Resource.Error -> {
-            ErrorComposable(
-                modifier = Modifier.fillMaxSize(),
-                error = userState.error,
-            )
-        }
+    Box(modifier = Modifier.fillMaxSize()) {
+        when (refreshState) {
 
-        is Resource.Loading -> {
-            LoadingComposable(modifier = Modifier.fillMaxSize())
-        }
+            is LoadState.Error -> {
+                ErrorComposable(
+                    modifier = Modifier.fillMaxSize(),
+                    error = refreshState.error.localizedMessage ?: "unable to load user accounts"
+                )
+            }
 
-        is Resource.Success -> {
-            Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.surface) {
-                AccountsScreenComposable(
-                    accounts = userState.result ?: emptyList(),
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    lazyColumnState = lazyListState,
-                    navHostController = navHostController
-                ) { username ->
-                    accountsScreenViewModel.onChatAccountItemClicked(username)
+            is LoadState.Loading -> {
+                LoadingComposable(modifier = Modifier
+                    .size(32.dp)
+                    .align(Alignment.Center))
+            }
+
+            is LoadState.NotLoading -> {
+                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.surface) {
+                    AccountsScreenComposable(
+                        accounts = accountsUserModelPagingData,
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        lazyColumnState = lazyListState,
+                        navHostController = navHostController
+                    ) { username ->
+                        accountsScreenViewModel.onChatAccountItemClicked(username)
+                    }
                 }
             }
         }

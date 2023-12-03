@@ -3,6 +3,6 @@ package com.example.demochatapplication.features.accounts.domain.model
 /**
  * Created by Jatin Vashisht on 19-10-2023.
  */
-data class UserModel(
+data class AccountUserModel(
     val username: String,
 )
