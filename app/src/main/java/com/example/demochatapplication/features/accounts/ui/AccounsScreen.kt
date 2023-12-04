@@ -59,7 +59,8 @@ fun AccountsScreenParent(
             is LoadState.Loading -> {
                 LoadingComposable(modifier = Modifier
                     .size(32.dp)
-                    .align(Alignment.Center))
+                    .align(Alignment.Center)
+                )
             }
 
             is LoadState.NotLoading -> {

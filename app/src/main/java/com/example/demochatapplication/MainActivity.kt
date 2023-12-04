@@ -1,5 +1,6 @@
 package com.example.demochatapplication
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -22,6 +23,7 @@ import com.example.demochatapplication.features.shared.socket.SocketManager
 import com.example.demochatapplication.core.navigation.Destinations
 import com.example.demochatapplication.core.navigation.NavArgsKeys
 import com.example.demochatapplication.features.searchuseraccounts.ui.SearchUserScreenParent
+import com.example.demochatapplication.features.shared.chatsyncservice.ChatSyncService
 import com.example.demochatapplication.features.shared.internetconnectivity.NetworkConnectionManager
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import com.example.demochatapplication.theme.DemoChatApplicationTheme
@@ -40,9 +42,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val chatSyncServiceIntent = Intent(this@MainActivity, ChatSyncService::class.java)
+        startService(chatSyncServiceIntent)
+
         lifecycleScope.launch {
-            SocketManager.setSocket(url = Constants.SERVER_URL, userSettingsRepository.getFirstEntry().token)
-            SocketManager.establishConnection()
+//            SocketManager.setSocket(url = Constants.SERVER_URL, userSettingsRepository.getFirstEntry().token)
+//            SocketManager.establishConnection()
         }
 
         setContent {
