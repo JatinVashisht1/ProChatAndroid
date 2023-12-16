@@ -189,7 +189,7 @@ fun ChatScreenContent(
                             )
                         }
                         is ChatScreenUiModel.UnreadMessagesModel -> {
-                            Text(text = chatScreenUiModel.data)
+                            Text(text = chatScreenUiModel.data, modifier = Modifier.rotate(180f))
                         }
 
                         else -> {

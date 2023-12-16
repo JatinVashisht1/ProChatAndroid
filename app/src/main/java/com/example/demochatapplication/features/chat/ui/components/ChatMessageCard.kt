@@ -73,12 +73,14 @@ fun ChatMessageCard(
 
                 Spacer(modifier = Modifier.height(PaddingValues.MEDIUM))
 
-                Text(
-                    text = chatModel.deliveryState.rawString,
-                    fontSize = MaterialTheme.typography.body2.fontSize,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.End
-                )
+                if (chatModel.from == username) {
+                    Text(
+                        text = chatModel.deliveryState.rawString,
+                        fontSize = MaterialTheme.typography.body2.fontSize,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.End
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(PaddingValues.MEDIUM))
 

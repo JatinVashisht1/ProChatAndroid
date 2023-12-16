@@ -6,6 +6,8 @@ import com.example.demochatapplication.core.remote.dto.GetChatMessagesBetween2Us
 import com.example.demochatapplication.core.remote.dto.GetChatMessagesBetween2UsersDto
 import com.example.demochatapplication.core.remote.dto.SearchUserBodyDto
 import com.example.demochatapplication.core.remote.dto.SearchUserResponseDto
+import com.example.demochatapplication.core.remote.dto.UpdateFirebaseRegistrationTokenBody
+import com.example.demochatapplication.core.remote.dto.UpdateFirebaseTokenResponseDto
 import com.example.demochatapplication.features.login.data.dto.SignInBodyDto
 import com.example.demochatapplication.features.login.data.dto.SignInResponseDto
 import retrofit2.Response
@@ -39,6 +41,12 @@ interface ChatApi {
         @Header(AUTHORIZATION_HEADER) authorizationHeader: String,
         @Path(ANOTHER_USERNAME_URL_PARAM) anotherUsername: String,
     ): Response<GetChatMessagesBetween2UsersDto>
+
+    @POST("/updateFirebaseToken")
+    suspend fun updateUserFirebaseRegistrationToken(
+        @Header(AUTHORIZATION_HEADER) authorizationHeader: String,
+        @Body updateFirebaseRegistrationTokenBody: UpdateFirebaseRegistrationTokenBody
+    ): Response<UpdateFirebaseTokenResponseDto>
 
     companion object {
         const val ANOTHER_USERNAME_URL_PARAM = "anotherUsername"

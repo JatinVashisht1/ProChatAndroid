@@ -28,24 +28,10 @@ class ChatSyncService: Service() {
     lateinit var userSettingsRepository: UserSettingsRepository
     override fun onCreate() {
         super.onCreate()
-        Timber.tag(TAG).d("inside on create")
-        CoroutineScope(IO).launch {
-            SocketManager.setSocket(url = Constants.SERVER_URL, userSettingsRepository.getFirstEntry().token)
-            SocketManager.establishConnection()
-        }
+        
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        SocketManager.mSocket?.let {
-            Timber.tag(TAG).d("inside onstart command")
-        }
-
-        val emitter = Emitter.Listener {dataArgs->
-            val data = dataArgs[0]
-            Timber.tag(TAG).d("data is $data")
-        }
-
-        SocketManager.mSocket?.on(SocketEvents.Chat.eventName, emitter)
 
         return START_STICKY
     }

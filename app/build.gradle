@@ -5,6 +5,7 @@ plugins {
     id 'kotlin-kapt'
 //    id 'com.google.devtools.ksp'
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.9.0'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -62,6 +63,7 @@ android {
 }
 
 dependencies {
+
     def appcompat_version = "1.6.1"
     implementation "androidx.appcompat:appcompat:$appcompat_version"
 
@@ -145,7 +147,10 @@ dependencies {
     // coroutines support for room
     implementation("androidx.room:room-ktx:2.6.0")
 
-
+    // firebase
+    implementation platform('com.google.firebase:firebase-bom:32.6.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-messaging-ktx'
 
 }
 

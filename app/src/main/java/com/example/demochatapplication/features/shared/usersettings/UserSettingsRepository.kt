@@ -58,24 +58,32 @@ class UserSettingsRepository @Inject constructor(
         }
     }
 
+    suspend fun writeFirebaseRegistrationToken (firebaseRegistrationToken: String) {
+        datastore.edit {
+            it[PreferencesKeys.KEY_FIREBASE_REGISTRATION_TOKEN] = firebaseRegistrationToken
+        }
+    }
+
     suspend fun writeUserSettings(userSettings: UserSettings) {
         datastore.edit {
             it[PreferencesKeys.KEY_TOKEN] = userSettings.token
             it[PreferencesKeys.KEY_PASSWORD] = userSettings.password
             it[PreferencesKeys.KEY_USERNAME] = userSettings.username
+            it[PreferencesKeys.KEY_FIREBASE_REGISTRATION_TOKEN] = userSettings.firebaseRegistrationToken
         }
     }
     private fun mapPreferencesToUserSettings(preferences: Preferences): UserSettings {
         val username = preferences[PreferencesKeys.KEY_USERNAME] ?:""
         val password = preferences[PreferencesKeys.KEY_PASSWORD] ?: ""
         val token = preferences[PreferencesKeys.KEY_TOKEN] ?: ""
-
-        return UserSettings(username = username, password = password, token = token)
+        val firebaseRegistrationToken = preferences[PreferencesKeys.KEY_FIREBASE_REGISTRATION_TOKEN] ?: ""
+        return UserSettings(username = username, password = password, token = token, firebaseRegistrationToken = firebaseRegistrationToken)
     }
 
     private object PreferencesKeys{
         val KEY_USERNAME = stringPreferencesKey("username")
         val KEY_PASSWORD = stringPreferencesKey("password")
         val KEY_TOKEN = stringPreferencesKey("token")
+        val KEY_FIREBASE_REGISTRATION_TOKEN = stringPreferencesKey("firebaseregistrationtoken")
     }
 }

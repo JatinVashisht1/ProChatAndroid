@@ -2,22 +2,22 @@ package com.example.demochatapplication.features.login.ui
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
-import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.demochatapplication.core.navigation.Destinations
 import com.example.demochatapplication.features.login.core.UnsuccessfulLoginException
 import com.example.demochatapplication.features.login.domain.model.SignInBodyEntity
 import com.example.demochatapplication.features.login.domain.repository.IAuthenticationRepository
 import com.example.demochatapplication.features.login.ui.uistate.LoginScreenState
 import com.example.demochatapplication.features.login.ui.uistate.PasswordTextFieldProperties
-import com.example.demochatapplication.core.navigation.Destinations
 import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -41,12 +41,15 @@ class LoginScreenViewModel @Inject constructor(
         viewModelScope.launch(IO) {
             val username = _loginScreenState.value.usernameTextFieldState.text
             val password = _loginScreenState.value.passwordTextFieldState.text
+            val firebaseRegistrationToken = FirebaseMessaging.getInstance().token.await()
+            Timber.tag(TAG).d("firebase registration token is $firebaseRegistrationToken")
 
             try {
                 val signInUserResponseEntity = authenticationRepository.signInUser(
                     SignInBodyEntity(
                         username = username,
                         password = password,
+                        firebaseRegistrationToken = firebaseRegistrationToken,
                     )
                 )
 
@@ -54,6 +57,7 @@ class LoginScreenViewModel @Inject constructor(
                     username = _loginScreenState.value.usernameTextFieldState.text,
                     password = _loginScreenState.value.passwordTextFieldState.text,
                     token = signInUserResponseEntity.token,
+                    firebaseRegistrationToken = firebaseRegistrationToken
                 )
 
                 Timber.tag(TAG).d("SignIn Response is $signInUserResponseEntity")
@@ -79,18 +83,24 @@ class LoginScreenViewModel @Inject constructor(
         )
     }
 
-    private suspend fun saveUserInfo(token: String, username: String, password: String) {
+    private suspend fun saveUserInfo(
+        token: String,
+        username: String,
+        password: String,
+        firebaseRegistrationToken: String,
+    ) {
         userSettingsRepository.writeUserSettings(
             UserSettings(
                 username = username,
                 password = password,
-                token = token
+                token = token,
+                firebaseRegistrationToken = firebaseRegistrationToken,
             )
         )
     }
 
     private suspend fun onEvent(event: UiEvents) {
-            uiEvents.send(event)
+        uiEvents.send(event)
     }
 
     companion object {

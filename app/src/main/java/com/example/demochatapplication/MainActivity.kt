@@ -1,13 +1,18 @@
 package com.example.demochatapplication
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -32,10 +37,11 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var userSettingsRepository: UserSettingsRepository
+
 
     @Inject
     lateinit var networkConnectionManager: NetworkConnectionManager
@@ -45,9 +51,11 @@ class MainActivity : ComponentActivity() {
         val chatSyncServiceIntent = Intent(this@MainActivity, ChatSyncService::class.java)
         startService(chatSyncServiceIntent)
 
+        createNotificationChannel()
+
         lifecycleScope.launch {
-//            SocketManager.setSocket(url = Constants.SERVER_URL, userSettingsRepository.getFirstEntry().token)
-//            SocketManager.establishConnection()
+            SocketManager.setSocket(url = Constants.SERVER_URL, userSettingsRepository.getFirstEntry().token)
+            SocketManager.establishConnection()
         }
 
         setContent {
@@ -63,7 +71,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = Destinations.DestinationSwitcher.route
                     ) {
                         composable(Destinations.DestinationSwitcher.route) {
-                            DestinationSwitcherScreen(navController = navController)
+                            DestinationSwitcherScreen(navController = navController, context = this@MainActivity)
                         }
 
                         composable(Destinations.LoginScreen.route) {
@@ -104,7 +112,19 @@ class MainActivity : ComponentActivity() {
         networkConnectionManager.stopMonitoring()
     }
 
+    private fun createNotificationChannel () {
+        val notificationChannel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_HIGH).apply {
+            description = CHANNEL_DESCRIPTION
+        }
+
+        val notificationManager = NotificationManagerCompat.from(this)
+        notificationManager.createNotificationChannel(notificationChannel)
+    }
+
     companion object {
         const val TAG = "mainactivitytag"
+        const val CHANNEL_NAME = "firebasenotificationchannel"
+        const val CHANNEL_DESCRIPTION = "show new message notification"
+        const val CHANNEL_ID = "firebasenotificationchannel"
     }
 }

@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
-import androidx.paging.map
 import com.example.demochatapplication.core.Constants
 import com.example.demochatapplication.core.Mapper
 import com.example.demochatapplication.features.chat.domain.model.ChatScreenUiModel
@@ -31,7 +30,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -123,7 +121,7 @@ class ChatScreenViewModel @Inject constructor(
             }
 
             launch {
-                updateMessageDeliveryStatus()
+                updateAllMessageDeliveryStatusBetween2Users()
             }
         }
     }
@@ -198,7 +196,7 @@ class ChatScreenViewModel @Inject constructor(
         }
     }
 
-    private suspend fun updateMessageDeliveryStatus() {
+    private suspend fun updateAllMessageDeliveryStatusBetween2Users() {
         withContext(IO) {
             val username = _userSettingsStateFlow.value.username
             val anotherUsername = _anotherUsernameState.value
@@ -217,13 +215,16 @@ class ChatScreenViewModel @Inject constructor(
         val data = chatEventData[0].toString()
         // Timber.tag(TAG).d("message is $data")
 
-        val (from, to, message, createdAt, deliveryStatus, messageId) = parseChatEventData(data)
+        val chatMessageModel = parseChatEventData(data)
+        val (from, to, message, createdAt, deliveryStatus, messageId) = chatMessageModel
 
         val shouldStoreInDatabase = chatRepository.doesMessageExist(messageId = messageId) == 0
 
         if (shouldStoreInDatabase) {
             handleDatabaseStorage(from, to, message, createdAt, deliveryStatus, messageId)
         }
+
+        sendUpdateMessageDeliveryStatus(message = chatMessageModel)
     }
 
     private fun parseChatEventData(data: String): ChatEventMessage {
@@ -290,6 +291,13 @@ class ChatScreenViewModel @Inject constructor(
             messageId = messageId,
             updatedStatus = MessageDeliveryState.Read.rawString,
         )
+    }
+
+    private fun sendUpdateMessageDeliveryStatus (message: ChatEventMessage) {
+        if (message.to == _userSettingsStateFlow.value.username) {
+            val updateMessageDeliveryStateModel = UpdateMessageDeliveryStateModel(from = message.from, to = message.to, messageId = message.messageId, updatedStatus = MessageDeliveryState.Read.rawString)
+            SocketManager.mSocket?.emit(SocketEvents.UpdateMessageDeliveryStatus.eventName, Json.encodeToString(updateMessageDeliveryStateModel))
+        }
     }
 
     override fun onCleared() {
