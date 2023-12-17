@@ -26,6 +26,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,6 +50,8 @@ import com.example.demochatapplication.features.authentication.ui.login.utils.Pa
 import com.example.demochatapplication.features.shared.composables.ErrorComposable
 import com.example.demochatapplication.features.shared.composables.LoadingComposable
 import com.example.demochatapplication.theme.DarkMessageCardBackgroundSender
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.consumeAsFlow
 import timber.log.Timber
 
 @Composable
@@ -58,12 +61,21 @@ fun ChatScreen(
     val userCredentials = chatScreenViewModel.userSettingsStateFlow.collectAsState().value
     val sendMessageTextFieldState by chatScreenViewModel.sendMessageTextFieldState.collectAsState()
     val textMessages = chatScreenViewModel.textMessageListState.collectAsLazyPagingItems()
-    val anotherUsername = chatScreenViewModel.anotherUsernameState.collectAsState().value
-    val chatMessagesListState = rememberLazyListState()
     val chatScreenState = chatScreenViewModel.chatScreenState.collectAsState().value
+    val lazyListState = rememberLazyListState()
 
     SideEffect {
         Timber.tag(TAG).d("text messages count: ${textMessages.itemCount}")
+    }
+
+    LaunchedEffect(key1 = Unit) {
+        chatScreenViewModel.chatScreenUiEvents.consumeAsFlow().collectLatest {
+            when (it) {
+                ChatScreenUiEvents.NavigateToFirstElement -> {
+                    lazyListState.animateScrollToItem(index = 0)
+                }
+            }
+        }
     }
 
 
@@ -104,8 +116,7 @@ fun ChatScreen(
                                 onSendTextMessageButtonClicked = chatScreenViewModel::onSendChatMessageClicked,
                                 textMessages = textMessages,
                                 username = userCredentials.username,
-                                anotherUsername = anotherUsername,
-                                chatMessagesListState = chatMessagesListState,
+                                lazyListState = lazyListState
                             )
                         }
                     }
@@ -125,13 +136,8 @@ fun ChatScreenContent(
     onTypingMessageValueChange: (String) -> Unit,
     onSendTextMessageButtonClicked: () -> Unit,
     textMessages: LazyPagingItems<ChatScreenUiModel>,
-    anotherUsername: String,
-    chatMessagesListState: LazyListState = rememberLazyListState(),
+    lazyListState: LazyListState = rememberLazyListState(),
 ) {
-
-    val roundedCornerDpValues = remember {
-        CornerRoundnessDpValues().getSimpleRoundedCornerValues()
-    }
 
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.height(PaddingValues.MEDIUM))
@@ -158,7 +164,6 @@ fun ChatScreenContent(
             FloatingActionButton(
                 onClick = onSendTextMessageButtonClicked,
                 modifier = Modifier
-//                    .weight(weight = 3f, fill = true),
                     .fillMaxWidth()
                     .clip(CircleShape),
                 backgroundColor = MaterialTheme.colors.primary,
@@ -170,7 +175,7 @@ fun ChatScreenContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize(),
-
+            state = lazyListState
         ) {
             items(count = textMessages.itemCount) { index ->
                 textMessages[index]?.let { chatScreenUiModel ->
@@ -189,14 +194,9 @@ fun ChatScreenContent(
                             )
                         }
                         is ChatScreenUiModel.UnreadMessagesModel -> {
-                            Text(text = chatScreenUiModel.data, modifier = Modifier.rotate(180f))
-                        }
-
-                        else -> {
-
+                            Text(text = chatScreenUiModel.data, modifier = Modifier.padding(vertical = PaddingValues.MEDIUM).rotate(180f))
                         }
                     }
-
                 }
             }
 

@@ -11,16 +11,23 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.example.demochatapplication.features.accounts.domain.model.AccountUserModel
 import com.example.demochatapplication.features.authentication.ui.login.utils.PaddingValues
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Created by Jatin Vashisht on 25-10-2023.
@@ -63,5 +70,25 @@ fun AccountsScreenComposable(
                 }
             }
         }
+    }
+}
+
+@Composable
+@Preview
+fun AccountsScreenComposablePreview() {
+    Surface {
+        AccountsScreenComposable(
+            accounts = flowOf(
+                PagingData.from(
+                    listOf(
+                        AccountUserModel("kush"),
+                        AccountUserModel("jatin"),
+                        AccountUserModel("alok"),
+                        AccountUserModel("dfadfdfd"),
+                    ))
+            ).collectAsLazyPagingItems(),
+            navHostController = rememberNavController(),
+            onChatAccountClicked = {}
+        )
     }
 }

@@ -6,25 +6,26 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import com.example.demochatapplication.core.Constants
 import com.example.demochatapplication.core.Mapper
+import com.example.demochatapplication.core.navigation.NavArgsKeys
+import com.example.demochatapplication.features.chat.domain.model.ChatEventMessage
 import com.example.demochatapplication.features.chat.domain.model.ChatScreenUiModel
 import com.example.demochatapplication.features.chat.domain.model.MessageDeliveryState
+import com.example.demochatapplication.features.chat.domain.model.UpdateAllMessageDeliveryStatusBetween2UsersModel
+import com.example.demochatapplication.features.chat.domain.model.UpdateMessageDeliveryStateModel
 import com.example.demochatapplication.features.chat.domain.repository.ChatRepository
 import com.example.demochatapplication.features.chat.ui.uistate.ChatScreenState
 import com.example.demochatapplication.features.chat.ui.uistate.SendMessageTextFieldState
 import com.example.demochatapplication.features.chat.ui.utils.ChatViewModelUtils.createChatEventMessage
 import com.example.demochatapplication.features.chat.ui.utils.ChatViewModelUtils.createChatModel
-import com.example.demochatapplication.core.navigation.NavArgsKeys
-import com.example.demochatapplication.features.chat.domain.model.ChatEventMessage
 import com.example.demochatapplication.features.shared.socket.SocketEvents
 import com.example.demochatapplication.features.shared.socket.SocketManager
-import com.example.demochatapplication.features.chat.domain.model.UpdateAllMessageDeliveryStatusBetween2UsersModel
-import com.example.demochatapplication.features.chat.domain.model.UpdateMessageDeliveryStateModel
 import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.socket.emitter.Emitter
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,6 +63,8 @@ class ChatScreenViewModel @Inject constructor(
     private lateinit var _textMessagesListState: Flow<PagingData<ChatScreenUiModel>>
     val textMessageListState get() = _textMessagesListState
 
+    val chatScreenUiEvents = Channel<ChatScreenUiEvents>()
+
     private val onChat = Emitter.Listener { chatEventData ->
         viewModelScope.launch {
             handleChatEvent(chatEventData)
@@ -85,11 +88,14 @@ class ChatScreenViewModel @Inject constructor(
         }
     }
 
-    private val onUpdateAllMessageDeliveryState = Emitter.Listener {data ->
+    private val onUpdateAllMessageDeliveryState = Emitter.Listener { data ->
         viewModelScope.launch {
             val dataString = data[0].toString()
-            val updateAllMessageDeliveryState = Json.decodeFromString<UpdateAllMessageDeliveryStatusBetween2UsersModel>(dataString)
-            chatRepository.updateChatMessageDeliveryStatusOfAllMessagesBetween2Users(updateAllMessageDeliveryStatusBetween2UsersModel = updateAllMessageDeliveryState)
+            val updateAllMessageDeliveryState =
+                Json.decodeFromString<UpdateAllMessageDeliveryStatusBetween2UsersModel>(dataString)
+            chatRepository.updateChatMessageDeliveryStatusOfAllMessagesBetween2Users(
+                updateAllMessageDeliveryStatusBetween2UsersModel = updateAllMessageDeliveryState
+            )
         }
     }
 
@@ -155,14 +161,17 @@ class ChatScreenViewModel @Inject constructor(
     }
 
     fun onSendTextFieldValueChange(newValue: String) {
-//        Timber.tag(TAG).d("chat screen view model $newValue")
         _sendMessageTextFieldState.value = _sendMessageTextFieldState.value.copy(message = newValue)
+    }
+
+    private suspend fun sendUiEvents (uiEvent: ChatScreenUiEvents) {
+        chatScreenUiEvents.send(uiEvent)
     }
 
     fun onSendChatMessageClicked() {
         val from = _userSettingsStateFlow.value.username
         val to = _anotherUsernameState.value
-        val message = _sendMessageTextFieldState.value.message
+        val message = _sendMessageTextFieldState.value.message.trim()
         val createdAt = System.currentTimeMillis()
         val deliveryState = MessageDeliveryState.Sent
         val messageId = UUID.randomUUID().toString()
@@ -174,6 +183,7 @@ class ChatScreenViewModel @Inject constructor(
 
 //            insertChatMessage(chatModel)
             sendChatEventMessage(chatEventMessage)
+            sendUiEvents(ChatScreenUiEvents.NavigateToFirstElement)
         }
     }
 
@@ -206,7 +216,10 @@ class ChatScreenViewModel @Inject constructor(
                 deliveryStatus = MessageDeliveryState.Read.rawString,
             )
             val updateAllMessageModelJson = Json.encodeToString(updateAllMessagesModel)
-            SocketManager.mSocket?.emit(SocketEvents.UpdateAllMessagesDeliveryStatusBetween2Users.eventName, updateAllMessageModelJson)
+            SocketManager.mSocket?.emit(
+                SocketEvents.UpdateAllMessagesDeliveryStatusBetween2Users.eventName,
+                updateAllMessageModelJson
+            )
         }
     }
 
@@ -281,10 +294,16 @@ class ChatScreenViewModel @Inject constructor(
     private fun handleUpdateMessageDeliveryState(from: String, messageId: String) {
         val updateMessageDeliveryStateModel = createUpdateMessageDeliveryStateModel(from, messageId)
         val updateMessageDeliveryStateString = Json.encodeToString(updateMessageDeliveryStateModel)
-        SocketManager.mSocket?.emit(SocketEvents.UpdateMessageDeliveryStatus.eventName, updateMessageDeliveryStateString)
+        SocketManager.mSocket?.emit(
+            SocketEvents.UpdateMessageDeliveryStatus.eventName,
+            updateMessageDeliveryStateString
+        )
     }
 
-    private fun createUpdateMessageDeliveryStateModel(from: String, messageId: String): UpdateMessageDeliveryStateModel {
+    private fun createUpdateMessageDeliveryStateModel(
+        from: String,
+        messageId: String
+    ): UpdateMessageDeliveryStateModel {
         return UpdateMessageDeliveryStateModel(
             from = _anotherUsernameState.value,
             to = _userSettingsStateFlow.value.username,
@@ -293,10 +312,18 @@ class ChatScreenViewModel @Inject constructor(
         )
     }
 
-    private fun sendUpdateMessageDeliveryStatus (message: ChatEventMessage) {
+    private fun sendUpdateMessageDeliveryStatus(message: ChatEventMessage) {
         if (message.to == _userSettingsStateFlow.value.username) {
-            val updateMessageDeliveryStateModel = UpdateMessageDeliveryStateModel(from = message.from, to = message.to, messageId = message.messageId, updatedStatus = MessageDeliveryState.Read.rawString)
-            SocketManager.mSocket?.emit(SocketEvents.UpdateMessageDeliveryStatus.eventName, Json.encodeToString(updateMessageDeliveryStateModel))
+            val updateMessageDeliveryStateModel = UpdateMessageDeliveryStateModel(
+                from = message.from,
+                to = message.to,
+                messageId = message.messageId,
+                updatedStatus = MessageDeliveryState.Read.rawString
+            )
+            SocketManager.mSocket?.emit(
+                SocketEvents.UpdateMessageDeliveryStatus.eventName,
+                Json.encodeToString(updateMessageDeliveryStateModel)
+            )
         }
     }
 
@@ -308,4 +335,8 @@ class ChatScreenViewModel @Inject constructor(
     companion object {
         const val TAG = "chatscreenviewmodel"
     }
+}
+
+sealed class ChatScreenUiEvents {
+    data object NavigateToFirstElement: ChatScreenUiEvents()
 }

@@ -6,8 +6,7 @@ import com.example.demochatapplication.core.navigation.Destinations
 import com.example.demochatapplication.features.authentication.core.UnSuccessfulSignUpException
 import com.example.demochatapplication.features.authentication.domain.model.SignUpBodyModel
 import com.example.demochatapplication.features.authentication.domain.repository.IAuthenticationRepository
-import com.example.demochatapplication.features.authentication.ui.login.UiEvents
-import com.example.demochatapplication.features.authentication.ui.signup.components.SignUpScreenState
+import com.example.demochatapplication.features.authentication.ui.signup.uistate.SignUpScreenState
 import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import com.google.firebase.messaging.FirebaseMessaging

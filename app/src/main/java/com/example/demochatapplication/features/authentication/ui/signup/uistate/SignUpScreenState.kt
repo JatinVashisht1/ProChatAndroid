@@ -1,4 +1,4 @@
-package com.example.demochatapplication.features.authentication.ui.signup.components
+package com.example.demochatapplication.features.authentication.ui.signup.uistate
 
 sealed class SignUpScreenState {
     data class Success (
