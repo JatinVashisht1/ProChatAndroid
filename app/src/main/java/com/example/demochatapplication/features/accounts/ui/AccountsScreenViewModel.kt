@@ -38,13 +38,19 @@ class AccountsScreenViewModel @Inject constructor(
         viewModelScope.launch {
             getAllUserAccountsJob?.cancel()
             getAllUserAccountsJob = launch {
-                accountsUserRepository
-                    .getAllUsers()
-                    .cachedIn(viewModelScope)
-                    .collectLatest { accountsUserModelPagingData ->
-                        _accountsUserModelPagingDataFlow.value = accountsUserModelPagingData
-                    }
+                loadAccounts()
             }
+        }
+    }
+
+    fun loadAccounts() {
+        viewModelScope.launch {
+            accountsUserRepository
+                .getAllUsers()
+                .cachedIn(viewModelScope)
+                .collectLatest { accountsUserModelPagingData ->
+                    _accountsUserModelPagingDataFlow.value = accountsUserModelPagingData
+                }
         }
     }
 

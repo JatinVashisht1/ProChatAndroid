@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -21,16 +20,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.example.demochatapplication.core.navigation.Destinations
 import com.example.demochatapplication.features.destinationswitcher.ui.components.ErrorComposable
 import com.example.demochatapplication.features.destinationswitcher.ui.components.LoadingComposable
-import com.example.demochatapplication.features.destinationswitcher.ui.utils.checkShouldNavigateToAccountScreen
 import com.example.demochatapplication.features.destinationswitcher.ui.utils.checkShouldRequestNotificationPermission
 import com.example.demochatapplication.features.destinationswitcher.uistate.DestinationSwitcherScreenState
-import com.example.demochatapplication.features.login.ui.utils.PaddingValues
+import com.example.demochatapplication.features.authentication.ui.login.utils.PaddingValues
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.consumeAsFlow
 

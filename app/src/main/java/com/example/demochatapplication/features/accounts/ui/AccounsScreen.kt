@@ -7,11 +7,17 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -29,12 +35,24 @@ import kotlinx.coroutines.flow.receiveAsFlow
 fun AccountsScreenParent(
     accountsScreenViewModel: AccountsScreenViewModel = hiltViewModel(),
     navHostController: NavHostController,
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
 ) {
     val accountsUserModelPagingData =
         accountsScreenViewModel.accountsUserModelPagingDataFlow.collectAsLazyPagingItems()
     val refreshState = accountsUserModelPagingData.loadState.refresh
 
     val lazyListState = rememberLazyListState()
+
+    DisposableEffect(key1 = lifecycleOwner) {
+        val observer = LifecycleEventObserver {_, event->
+            if (event == Lifecycle.Event.ON_START) {
+                accountsScreenViewModel.loadAccounts()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     LaunchedEffect(key1 = Unit) {
         accountsScreenViewModel.accountScreenEvents.receiveAsFlow().collectLatest { event ->

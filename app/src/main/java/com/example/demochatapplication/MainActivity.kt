@@ -3,9 +3,7 @@ package com.example.demochatapplication
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,10 +21,11 @@ import com.example.demochatapplication.core.Constants
 import com.example.demochatapplication.features.accounts.ui.AccountsScreenParent
 import com.example.demochatapplication.features.chat.ui.ChatScreen
 import com.example.demochatapplication.features.destinationswitcher.ui.DestinationSwitcherScreen
-import com.example.demochatapplication.features.login.ui.LoginScreenParent
+import com.example.demochatapplication.features.authentication.ui.login.LoginScreenParent
 import com.example.demochatapplication.features.shared.socket.SocketManager
 import com.example.demochatapplication.core.navigation.Destinations
 import com.example.demochatapplication.core.navigation.NavArgsKeys
+import com.example.demochatapplication.features.authentication.ui.signup.SignUpScreenParent
 import com.example.demochatapplication.features.searchuseraccounts.ui.SearchUserScreenParent
 import com.example.demochatapplication.features.shared.chatsyncservice.ChatSyncService
 import com.example.demochatapplication.features.shared.internetconnectivity.NetworkConnectionManager
@@ -76,6 +75,10 @@ class MainActivity : AppCompatActivity() {
 
                         composable(Destinations.LoginScreen.route) {
                             LoginScreenParent(navHostController = navController)
+                        }
+                        
+                        composable(Destinations.SignUpScreen.route) {
+                            SignUpScreenParent(navHostController = navController)
                         }
 
                         composable(

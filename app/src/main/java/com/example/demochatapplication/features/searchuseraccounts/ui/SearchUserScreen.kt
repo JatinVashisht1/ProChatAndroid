@@ -36,7 +36,7 @@ import androidx.navigation.NavHostController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.example.demochatapplication.features.login.ui.utils.PaddingValues
+import com.example.demochatapplication.features.authentication.ui.login.utils.PaddingValues
 import com.example.demochatapplication.features.searchuseraccounts.domain.model.SearchUserDomainModel
 import com.example.demochatapplication.features.searchuseraccounts.ui.components.TextFieldState
 import com.example.demochatapplication.features.shared.composables.ErrorComposable

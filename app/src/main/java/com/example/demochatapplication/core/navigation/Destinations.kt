@@ -6,4 +6,6 @@ sealed class Destinations(val route: String) {
     data object DestinationSwitcher: Destinations("DestinationSwitcher")
     data object AccountsScreen: Destinations("AccountsScreen")
     data object SearchUserScreen: Destinations("SearchUserScreen")
+
+    data object SignUpScreen: Destinations("signupscreen")
 }

@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.paging.compose.LazyPagingItems
 import com.example.demochatapplication.features.accounts.domain.model.AccountUserModel
-import com.example.demochatapplication.features.login.ui.utils.PaddingValues
+import com.example.demochatapplication.features.authentication.ui.login.utils.PaddingValues
 
 /**
  * Created by Jatin Vashisht on 25-10-2023.

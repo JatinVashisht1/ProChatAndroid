@@ -7,7 +7,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.example.demochatapplication.features.login.ui.utils.PaddingValues
+import com.example.demochatapplication.features.authentication.ui.login.utils.PaddingValues
 
 @Composable
 fun ErrorComposable(

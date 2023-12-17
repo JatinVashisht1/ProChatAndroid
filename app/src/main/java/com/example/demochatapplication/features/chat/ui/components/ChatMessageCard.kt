@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.demochatapplication.features.chat.domain.model.ChatScreenUiModel
 import com.example.demochatapplication.features.chat.ui.utils.CornerRoundnessDpValues
-import com.example.demochatapplication.features.login.ui.utils.PaddingValues
+import com.example.demochatapplication.features.authentication.ui.login.utils.PaddingValues
 import com.example.demochatapplication.theme.DarkMessageCardBackgroundSender
 import com.example.demochatapplication.theme.Typography
 import java.time.Instant

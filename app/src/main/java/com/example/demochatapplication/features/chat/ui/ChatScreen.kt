@@ -45,7 +45,7 @@ import com.example.demochatapplication.features.chat.ui.components.SendMessageTe
 import com.example.demochatapplication.features.chat.ui.uistate.ChatScreenState
 import com.example.demochatapplication.features.chat.ui.uistate.SendMessageTextFieldState
 import com.example.demochatapplication.features.chat.ui.utils.CornerRoundnessDpValues
-import com.example.demochatapplication.features.login.ui.utils.PaddingValues
+import com.example.demochatapplication.features.authentication.ui.login.utils.PaddingValues
 import com.example.demochatapplication.features.shared.composables.ErrorComposable
 import com.example.demochatapplication.features.shared.composables.LoadingComposable
 import com.example.demochatapplication.theme.DarkMessageCardBackgroundSender
