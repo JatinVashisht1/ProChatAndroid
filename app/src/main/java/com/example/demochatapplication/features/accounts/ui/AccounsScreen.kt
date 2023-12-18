@@ -44,9 +44,9 @@ fun AccountsScreenParent(
     val lazyListState = rememberLazyListState()
 
     DisposableEffect(key1 = lifecycleOwner) {
-        val observer = LifecycleEventObserver {_, event->
+        val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_START) {
-                accountsScreenViewModel.loadAccounts()
+                accountsScreenViewModel.loadAccounts(shouldLoadFromNetwork = true)
             }
         }
 
@@ -74,23 +74,28 @@ fun AccountsScreenParent(
                 )
             }
 
-            is LoadState.Loading -> {
-                LoadingComposable(modifier = Modifier
-                    .size(32.dp)
-                    .align(Alignment.Center)
-                )
-            }
-
+            is LoadState.Loading,
             is LoadState.NotLoading -> {
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.surface) {
-                    AccountsScreenComposable(
-                        accounts = accountsUserModelPagingData,
+                if (refreshState is LoadState.Loading && accountsUserModelPagingData.itemCount == 0) {
+                    LoadingComposable(
                         modifier = Modifier
-                            .fillMaxSize(),
-                        lazyColumnState = lazyListState,
-                        navHostController = navHostController
-                    ) { username ->
-                        accountsScreenViewModel.onChatAccountItemClicked(username)
+                            .size(32.dp)
+                            .align(Alignment.Center)
+                    )
+                } else {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = MaterialTheme.colors.background
+                    ) {
+                        AccountsScreenComposable(
+                            accounts = accountsUserModelPagingData,
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            lazyColumnState = lazyListState,
+                            navHostController = navHostController
+                        ) { username ->
+                            accountsScreenViewModel.onChatAccountItemClicked(username)
+                        }
                     }
                 }
             }

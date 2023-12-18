@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
  * Created by Jatin Vashisht on 19-10-2023.
  */
 interface AccountsUserRepository {
-    suspend fun getAllUsers(): Flow<PagingData<AccountUserModel>>
+    suspend fun getAllUsers(shouldLoadFromNetwork: Boolean): Flow<PagingData<AccountUserModel>>
 
 //    suspend fun searchUser(username: String,): List<UserModel>
 

@@ -43,7 +43,7 @@ fun AccountsScreenComposable(
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { AccountsScreenTopBar(navHostController = navHostController)}
+        topBar = { AccountsScreenTopBar(navHostController = navHostController) }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -62,7 +62,7 @@ fun AccountsScreenComposable(
                             .clip(RoundedCornerShape(PaddingValues.MEDIUM))
                             .fillMaxWidth()
                             .height(100.dp)
-                            .background(color = Color(51, 20, 30, 255))
+                            .background(color = MaterialTheme.colors.onBackground)
                             .clickable {
                                 onChatAccountClicked(accountsUserModel.username)
                             }

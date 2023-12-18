@@ -148,7 +148,7 @@ fun SearchUserScreen(
                         .height(100.dp)
                         .padding(horizontal = PaddingValues.MEDIUM)
                         .clip(RoundedCornerShape(PaddingValues.MEDIUM))
-                        .background(color = Color(51, 20, 30, 255))
+                        .background(color = MaterialTheme.colors.onBackground)
                         .clickable {
                             onSearchUserItemClicked(searchUserDomainModel.username)
                         }
@@ -170,7 +170,7 @@ fun SearchUserItem(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .padding(PaddingValues.MEDIUM),
-            color = MaterialTheme.colors.onBackground,
+            color = Color.White,
         )
     }
 }
@@ -189,11 +189,14 @@ fun SearchUserTextField(
         label = {
             Text(
                 text = searchTextFieldState.label,
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colors.primary
             )
         },
         placeholder = {
-            Text(text = searchTextFieldState.placeholder, color = DarkPlaceholderTextColor,)
+            Text(
+                text = searchTextFieldState.placeholder,
+                color = MaterialTheme.colors.primary,
+            )
         },
     )
 }

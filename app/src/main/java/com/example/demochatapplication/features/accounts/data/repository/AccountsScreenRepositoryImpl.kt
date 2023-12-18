@@ -55,7 +55,7 @@ class AccountsScreenRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAllUsers(): Flow<PagingData<AccountUserModel>> {
+    override suspend fun getAllUsers(shouldLoadFromNetwork: Boolean,): Flow<PagingData<AccountUserModel>> {
         val pageConfig = PagingConfig(
             pageSize = 50,
             prefetchDistance = 20,
@@ -65,7 +65,8 @@ class AccountsScreenRepositoryImpl @Inject constructor(
             networkConnectionManager = networkConnectionManager,
             accountsDatabase = accountsDatabase,
             chatApi = chatApi,
-            userSettings = userSettings
+            userSettings = userSettings,
+            shouldLoadFromNetwork = shouldLoadFromNetwork
         )
 
         val accountsUserModelPagingDataFlow = Pager(

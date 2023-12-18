@@ -26,6 +26,7 @@ class AccountsRemoteMediator @Inject constructor(
     private val accountsDatabase: AccountsDatabase,
     private val chatApi: ChatApi,
     private val userSettings: UserSettings,
+    private val shouldLoadFromNetwork: Boolean,
 ): RemoteMediator<Int, AccountsUserEntity>() {
     private val accountsUserDao = accountsDatabase.accountUserDao
     override suspend fun load(
@@ -68,7 +69,7 @@ class AccountsRemoteMediator @Inject constructor(
     }
 
     override suspend fun initialize(): InitializeAction {
-        return if (!networkConnectionManager.isInternetAvailable) {
+        return if (!networkConnectionManager.isInternetAvailable || !shouldLoadFromNetwork) {
             InitializeAction.SKIP_INITIAL_REFRESH
         } else {
             InitializeAction.LAUNCH_INITIAL_REFRESH

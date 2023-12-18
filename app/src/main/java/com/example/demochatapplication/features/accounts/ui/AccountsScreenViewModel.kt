@@ -38,15 +38,15 @@ class AccountsScreenViewModel @Inject constructor(
         viewModelScope.launch {
             getAllUserAccountsJob?.cancel()
             getAllUserAccountsJob = launch {
-                loadAccounts()
+                loadAccounts(shouldLoadFromNetwork = false)
             }
         }
     }
 
-    fun loadAccounts() {
+    fun loadAccounts(shouldLoadFromNetwork: Boolean) {
         viewModelScope.launch {
             accountsUserRepository
-                .getAllUsers()
+                .getAllUsers(shouldLoadFromNetwork = shouldLoadFromNetwork)
                 .cachedIn(viewModelScope)
                 .collectLatest { accountsUserModelPagingData ->
                     _accountsUserModelPagingDataFlow.value = accountsUserModelPagingData

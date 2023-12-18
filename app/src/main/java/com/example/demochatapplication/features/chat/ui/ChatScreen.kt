@@ -21,8 +21,10 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.Composable
@@ -138,10 +140,13 @@ fun ChatScreenContent(
     textMessages: LazyPagingItems<ChatScreenUiModel>,
     lazyListState: LazyListState = rememberLazyListState(),
 ) {
+    Scaffold(
+        topBar = {
 
-    Column(modifier = modifier) {
+        }
+    ) {
+    Column(modifier = modifier.padding(it)) {
         Spacer(modifier = Modifier.height(PaddingValues.MEDIUM))
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -188,13 +193,15 @@ fun ChatScreenContent(
                                     .fillMaxWidth()
                                     .wrapContentHeight()
                                     .rotate(180f),
-                                senderBackgroundColor = MaterialTheme.colors.primary,
-                                receiverBackgroundColor = DarkMessageCardBackgroundSender,
+                                senderBackgroundColor = MaterialTheme.colors.onBackground,
+                                receiverBackgroundColor = MaterialTheme.colors.primary,
                                 username = username,
                             )
                         }
                         is ChatScreenUiModel.UnreadMessagesModel -> {
-                            Text(text = chatScreenUiModel.data, modifier = Modifier.padding(vertical = PaddingValues.MEDIUM).rotate(180f))
+                            Text(text = chatScreenUiModel.data, modifier = Modifier
+                                .padding(vertical = PaddingValues.MEDIUM)
+                                .rotate(180f))
                         }
                     }
                 }
@@ -212,6 +219,7 @@ fun ChatScreenContent(
         }
 
 
+    }
     }
 }
 
