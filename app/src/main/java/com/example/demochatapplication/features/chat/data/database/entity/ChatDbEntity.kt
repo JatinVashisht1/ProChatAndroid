@@ -15,6 +15,7 @@ data class ChatDbEntity(
     val message: String,
     val timeStamp: Long,
     val deliveryStatus: MessageDeliveryState,
+    val deletedByReceiver: Boolean,
     @PrimaryKey
     val primaryKey: String,
 )

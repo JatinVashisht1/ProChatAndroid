@@ -47,6 +47,9 @@ interface ChatDao {
     @Delete()
     suspend fun deleteChatMessage(message: ChatDbEntity)
 
+    @Query("DELETE FROM chatdbentity WHERE `primaryKey` IN (:messageIds) AND (`from` == :initiatedBy OR :initiatedBy == :username)")
+    suspend fun deleteChatMessageByMessageId(messageIds: List<String>, initiatedBy: String, username: String)
+
     @Query("DELETE FROM chatdbentity where (`from` = :username1 AND `to` = :username2) OR (`from` = :username2 AND `to` = :username1)")
     suspend fun clearChatMessagesBetween2Users(username1: String, username2: String)
 

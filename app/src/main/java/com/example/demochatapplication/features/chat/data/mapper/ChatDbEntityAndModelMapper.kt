@@ -17,7 +17,8 @@ class ChatDbEntityAndModelMapper : Mapper<ChatDbEntity, ChatScreenUiModel.ChatMo
             message = objectTypeA.message,
             timeInMillis = objectTypeA.timeStamp,
             id = objectTypeA.primaryKey,
-            deliveryState = objectTypeA.deliveryStatus
+            deliveryState = objectTypeA.deliveryStatus,
+            deletedByReceiver = objectTypeA.deletedByReceiver,
         )
     }
 
@@ -30,7 +31,8 @@ class ChatDbEntityAndModelMapper : Mapper<ChatDbEntity, ChatScreenUiModel.ChatMo
             message = objectTypeB.message,
             timeStamp = objectTypeB.timeInMillis,
             primaryKey = objectTypeB.id,
-            deliveryStatus = objectTypeB.deliveryState
+            deliveryStatus = objectTypeB.deliveryState,
+            deletedByReceiver = objectTypeB.deletedByReceiver,
         )
     }
 }

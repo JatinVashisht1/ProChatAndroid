@@ -76,7 +76,7 @@ fun AccountsScreenParent(
 
             is LoadState.Loading,
             is LoadState.NotLoading -> {
-                if (refreshState is LoadState.Loading && accountsUserModelPagingData.itemCount == 0) {
+                if ((refreshState is LoadState.Loading) && (accountsUserModelPagingData.itemCount == 0)) {
                     LoadingComposable(
                         modifier = Modifier
                             .size(32.dp)

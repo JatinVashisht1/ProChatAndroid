@@ -85,9 +85,10 @@ class MainActivity : AppCompatActivity() {
                             route = Destinations.ChatScreen.route + "/{${NavArgsKeys.ANOTHER_USERNAME}}",
                             arguments = listOf(navArgument(NavArgsKeys.ANOTHER_USERNAME) {
                                 type = NavType.StringType
-                            })
+                            }),
+
                         ) {
-                            ChatScreen()
+                            ChatScreen(navController = navController)
                         }
 
                         composable(Destinations.AccountsScreen.route) {

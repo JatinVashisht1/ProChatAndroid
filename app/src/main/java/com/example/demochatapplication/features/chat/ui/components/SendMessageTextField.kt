@@ -6,12 +6,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.demochatapplication.features.chat.ui.uistate.SendMessageTextFieldState
+import com.example.demochatapplication.features.chat.ui.uistate.SendMessageScreenTextFieldState
 
 @Composable
 fun SendMessageTextField(
     modifier: Modifier = Modifier,
-    textFieldState: SendMessageTextFieldState,
+    textFieldState: SendMessageScreenTextFieldState,
     onTypingMessageValueChange: (String) -> Unit,
 ) {
     OutlinedTextField(

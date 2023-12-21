@@ -10,5 +10,6 @@ data class Message(
     val message: String,
     val messageId: String,
     val receiverUsername: String,
-    val senderUsername: String
+    val senderUsername: String,
+    val deletedByReceiver: Boolean,
 )

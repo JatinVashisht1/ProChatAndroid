@@ -1,5 +1,7 @@
 package com.example.demochatapplication.core.remote
 
+import com.example.demochatapplication.core.remote.dto.DeleteChatMessageBodyDto
+import com.example.demochatapplication.core.remote.dto.DeleteMessageResponseDto
 import com.example.demochatapplication.core.remote.dto.GetChatAccountsDto
 import com.example.demochatapplication.core.remote.dto.GetChatMessagesBetween2UsersDto
 import com.example.demochatapplication.core.remote.dto.SearchUserResponseDto
@@ -11,6 +13,7 @@ import com.example.demochatapplication.core.remote.dto.SignInBodyDto
 import com.example.demochatapplication.core.remote.dto.SignInResponseDto
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
@@ -47,6 +50,9 @@ interface ChatApi {
         @Header(AUTHORIZATION_HEADER) authorizationHeader: String,
         @Body updateFirebaseRegistrationTokenBody: UpdateFirebaseRegistrationTokenBody
     ): Response<UpdateFirebaseTokenResponseDto>
+
+    @DELETE("/chat/deletechatmessage")
+    suspend fun deleteChatMessage(@Header(AUTHORIZATION_HEADER) authorizationHeader: String, @Body deleteChatMessageBodyDto: DeleteChatMessageBodyDto): Response<DeleteMessageResponseDto>
 
     companion object {
         const val ANOTHER_USERNAME_URL_PARAM = "anotherUsername"

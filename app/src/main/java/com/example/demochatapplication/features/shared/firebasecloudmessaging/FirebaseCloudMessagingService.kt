@@ -65,6 +65,7 @@ class FirebaseCloudMessagingService : FirebaseMessagingService() {
                         timeInMillis = fullMessage.createdAt,
                         id = fullMessage.messageId,
                         deliveryState = messageDeliveryStateAndStringMapper.mapBtoA(fullMessage.deliveryStatus),
+                        deletedByReceiver = false,
                         )
                     chatRepository.insertChatMessage(chatMessage)
                 }

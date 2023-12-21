@@ -66,6 +66,9 @@ class LoginScreenViewModel @Inject constructor(
 
             } catch (unsuccessfulLoginException: UnsuccessfulLoginException) {
                 Timber.tag(TAG).d("Unable to login: ${unsuccessfulLoginException.message}")
+                onEvent(UiEvents.ShowSnackbar(unsuccessfulLoginException.message?: "Unable to login at the moment. Please try again later"))
+            } catch (e: Exception) {
+                onEvent(UiEvents.ShowSnackbar("Unable to login at the moment. Please try again later"))
             }
         }
     }
@@ -116,4 +119,5 @@ class LoginScreenViewModel @Inject constructor(
 
 sealed interface UiEvents {
     data class NavigateTo(val destination: String, val shouldPopBackStack: Boolean = false) : UiEvents
+    data class ShowSnackbar(val message: String): UiEvents
 }

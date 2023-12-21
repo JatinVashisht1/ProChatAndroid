@@ -10,7 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.OutlinedButton
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -32,7 +34,9 @@ fun LoginScreenParent(
     loginScreenViewModel: LoginScreenViewModel = hiltViewModel(),
     navHostController: NavHostController,
 ) {
+    val usernameTextFieldState = loginScreenViewModel.loginScreenState.value.usernameTextFieldState
     val context: Context = LocalContext.current
+    val scaffoldState = rememberScaffoldState()
     LaunchedEffect(key1 = Unit) {
         loginScreenViewModel.uiEvents.consumeAsFlow().collectLatest {
             when(it) {
@@ -43,12 +47,21 @@ fun LoginScreenParent(
 
                     navHostController.navigate(it.destination)
                 }
+
+                is UiEvents.ShowSnackbar -> {
+                    scaffoldState.snackbarHostState.showSnackbar(it.message, actionLabel = "understood")
+                }
             }
         }
     }
 
-    val usernameTextFieldState = loginScreenViewModel.loginScreenState.value.usernameTextFieldState
-    Box(modifier = Modifier.fillMaxSize()) {
+
+    Scaffold (scaffoldState = scaffoldState) {
+    Box(
+        modifier = Modifier
+            .padding(it)
+            .fillMaxSize()
+    ) {
         LoginScreen(
             modifier = Modifier.fillMaxSize(),
             usernameTextFieldState = usernameTextFieldState,
@@ -60,6 +73,7 @@ fun LoginScreenParent(
             onNavigateToSignUpScreenClicked = loginScreenViewModel::onNavigateToSignUpButtonClicked,
         )
 
+        }
     }
 }
 
@@ -114,7 +128,9 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(PaddingValues.MEDIUM))
 
-            OutlinedButton(onClick = onNavigateToSignUpScreenClicked, modifier = Modifier.padding(horizontal = PaddingValues.LARGE).fillMaxWidth()) {
+            OutlinedButton(onClick = onNavigateToSignUpScreenClicked, modifier = Modifier
+                .padding(horizontal = PaddingValues.LARGE)
+                .fillMaxWidth()) {
                 Text(text = "create account")
             }
         }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
@@ -65,11 +66,9 @@ fun ChatMessageCard(
                 .wrapContentHeight()
                 .align(if (username == chatModel.from) Alignment.CenterEnd else Alignment.CenterStart),
             backgroundColor = if (username == chatModel.from) senderBackgroundColor else receiverBackgroundColor,
-            shape = RoundedCornerShape(
-                topStart = cornerRoundnessDpValues.topStart,
-                topEnd = cornerRoundnessDpValues.topEnd,
-                bottomStart = cornerRoundnessDpValues.bottomStart,
-                bottomEnd = cornerRoundnessDpValues.bottomEnd
+            shape = CutCornerShape(
+                bottomEnd = if (username == chatModel.from) 0.dp else PaddingValues.MEDIUM,
+                bottomStart = if (username == chatModel.from) PaddingValues.MEDIUM else 0.dp
             ),
         ) {
             Column(
@@ -125,7 +124,8 @@ fun PreviewChatMessageCard() {
             from = "def",
             to = "to",
             message = "this is a message",
-            timeInMillis = System.currentTimeMillis()
+            timeInMillis = System.currentTimeMillis(),
+            deletedByReceiver = false
         ),
         username = "def",
         senderBackgroundColor = Color.Yellow

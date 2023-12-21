@@ -11,7 +11,8 @@ sealed class ChatScreenUiModel {
         val message: String = "",
         val timeInMillis: Long = System.currentTimeMillis(),
         val id: String = UUID.randomUUID().toString(),
-        val deliveryState: MessageDeliveryState = MessageDeliveryState.Sent
+        val deliveryState: MessageDeliveryState = MessageDeliveryState.Sent,
+        val deletedByReceiver: Boolean,
     ): ChatScreenUiModel()
 
     data class UnreadMessagesModel constructor(

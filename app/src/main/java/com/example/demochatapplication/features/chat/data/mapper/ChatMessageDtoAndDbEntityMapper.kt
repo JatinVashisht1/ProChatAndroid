@@ -20,7 +20,8 @@ class ChatMessageDtoAndDbEntityMapper @Inject constructor(
                 message = message.message,
                 timeStamp = (message.createdTime.toLong() / 1000),
                 primaryKey = message.messageId,
-                deliveryStatus = deliveryState
+                deliveryStatus = deliveryState,
+                deletedByReceiver = message.deletedByReceiver,
             )
         }
 

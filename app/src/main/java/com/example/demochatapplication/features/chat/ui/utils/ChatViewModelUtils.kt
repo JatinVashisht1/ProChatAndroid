@@ -19,7 +19,8 @@ object ChatViewModelUtils {
             message = message,
             timeInMillis = createdAt,
             id = messageId,
-            deliveryState = deliveryState
+            deliveryState = deliveryState,
+            deletedByReceiver = false,
         )
     }
 

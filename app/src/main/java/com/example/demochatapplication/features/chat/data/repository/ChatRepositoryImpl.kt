@@ -5,10 +5,13 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.filter
 import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.example.demochatapplication.core.Mapper
 import com.example.demochatapplication.core.remote.ChatApi
+import com.example.demochatapplication.core.remote.dto.DeleteChatMessageBodyDto
+import com.example.demochatapplication.core.remote.dto.DeleteMessageResponseDto
 import com.example.demochatapplication.core.remote.dto.GetChatMessagesBetween2UsersDto
 import com.example.demochatapplication.features.chat.data.database.ChatDatabase
 import com.example.demochatapplication.features.chat.data.database.entity.ChatDbEntity
@@ -16,16 +19,21 @@ import com.example.demochatapplication.features.chat.data.database.entity.Update
 import com.example.demochatapplication.features.chat.data.database.entity.UpdateMessageDeliveryStatusDbEntity
 import com.example.demochatapplication.features.chat.data.paging.ChatMessagesRemoteMediator
 import com.example.demochatapplication.features.chat.domain.model.ChatScreenUiModel
+import com.example.demochatapplication.features.chat.domain.model.DeleteChatMessageBodyModel
+import com.example.demochatapplication.features.chat.domain.model.DeleteChatMessageResponseModel
 import com.example.demochatapplication.features.chat.domain.model.MessageDeliveryState
 import com.example.demochatapplication.features.chat.domain.model.UpdateAllMessageDeliveryStatusBetween2UsersModel
 import com.example.demochatapplication.features.chat.domain.repository.ChatRepository
+import com.example.demochatapplication.features.shared.usersettings.UserSettings
 import com.example.demochatapplication.features.shared.usersettings.UserSettingsRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -45,13 +53,17 @@ class ChatRepositoryImpl @Inject constructor(
     private val chatDao = chatDatabase.chatDao
     private lateinit var authorizationHeader: String
     private var hasFoundUnreadMessage = false
-
+    private lateinit var userSettings: UserSettings
     init {
         CoroutineScope(IO).launch {
-            authorizationHeader = userSettingsRepository.getFirstEntry().token
+            userSettingsRepository.userSettings.collectLatest {
+                authorizationHeader = it.token
+                userSettings = it
+            }
         }
     }
 
+    /*
     private suspend fun fetchChatMessagesFromNetwork(
         anotherUsername: String,
         authorizationHeader: String
@@ -77,10 +89,12 @@ class ChatRepositoryImpl @Inject constructor(
                 message = message.message,
                 timeStamp = (message.createdTime.toLong() / 1000),
                 primaryKey = message.messageId,
-                deliveryStatus = deliveryState
+                deliveryStatus = deliveryState,
+
             )
         }
     }
+     */
 
     private suspend fun saveChatMessagesToDatabase(
         currentUsername: String,
@@ -130,6 +144,14 @@ class ChatRepositoryImpl @Inject constructor(
                 pagingDataDbEntity.map { chatDbEntity: ChatDbEntity ->
                     chatDbEntityAndModelMapper.mapAtoB(chatDbEntity)
                 }
+//                    .filter { chatModel->
+//                        if (!(chatModel.deletedByReceiver && chatModel.to == userSettings.username)) {
+//                            true
+//                        } else {
+//                            Timber.tag(TAG).d("chat model is $chatModel")
+//                            false
+//                        }
+//                    }
                     .insertSeparators { before: ChatScreenUiModel.ChatModel?, _: ChatScreenUiModel.ChatModel? ->
                         when {
                             (((before?.deliveryState == MessageDeliveryState.Sent || before?.deliveryState == MessageDeliveryState.Received) && (!hasFoundUnreadMessage))) -> {
@@ -198,6 +220,42 @@ class ChatRepositoryImpl @Inject constructor(
                 to = to,
                 messageDeliveryState = messageDeliveryState
             )
+        }
+    }
+
+    override suspend fun deleteChatMessageFromNetwork(deleteChatMessageBodyModel: DeleteChatMessageBodyModel): DeleteChatMessageResponseModel {
+        val deleteChatMessageBodyDto = DeleteChatMessageBodyDto(deleteChatMessageBodyModel.messageIds)
+        val deleteChatMessageResponse = chatApi.deleteChatMessage(authorizationHeader = authorizationHeader, deleteChatMessageBodyDto = deleteChatMessageBodyDto)
+        val hasChatMessageDeleted = deleteChatMessageResponse.isSuccessful || deleteChatMessageResponse.body() == null
+        val defaultErrorMessage = "message was not deleted, try again later"
+
+        if (!hasChatMessageDeleted) {
+            val errorBody = deleteChatMessageResponse.errorBody()?.string()
+            errorBody?.let {
+                if (deleteChatMessageResponse.code() == 400) {
+                    val responseDto = Json.decodeFromString<DeleteMessageResponseDto>(errorBody)
+                    return DeleteChatMessageResponseModel(success = responseDto.success, message = responseDto.message)
+                } else {
+                    return DeleteChatMessageResponseModel(success = false, message = defaultErrorMessage)
+                }
+            }
+
+            return DeleteChatMessageResponseModel(success = false, message = defaultErrorMessage)
+        }
+
+        val deleteChatMessageResponseDto = deleteChatMessageResponse.body()?: DeleteMessageResponseDto(success = false, message = defaultErrorMessage)
+
+        return DeleteChatMessageResponseModel(
+            success = deleteChatMessageResponseDto.success,
+            message = deleteChatMessageResponseDto.message
+        )
+    }
+
+    override suspend fun deleteChatMessagesByMessageId(messageIds: List<String>, initiatedBy: String) {
+        try {
+            chatDao.deleteChatMessageByMessageId(messageIds = messageIds, initiatedBy = initiatedBy, username = userSettings.username)
+        } catch (e: Exception) {
+            Timber.tag(TAG).d("unable to delete chat messages by id due to $e")
         }
     }
 

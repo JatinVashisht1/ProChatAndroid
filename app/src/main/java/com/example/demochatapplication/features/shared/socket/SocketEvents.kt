@@ -9,4 +9,5 @@ sealed class SocketEvents (val eventName: String) {
     data object Disconnect: SocketEvents("disconnect")
     data object UpdateMessageDeliveryStatus: SocketEvents("updateMessageDeliveryStatus")
     data object UpdateAllMessagesDeliveryStatusBetween2Users: SocketEvents("updateAllMessageDeliveryStatus")
+    data object DeleteChatMessages: SocketEvents("deleteChatMessages")
 }
